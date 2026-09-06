@@ -673,6 +673,7 @@
             <button class="toggle" id="tglPinyin" aria-pressed="true"><span class="dot"></span>Pinyin</button>
             <button class="toggle" id="tglSound" aria-pressed="true"><span class="dot"></span>Sound</button>
             <button class="toggle" id="tglMusic" aria-pressed="true"><span class="dot"></span>Music</button>
+            <button class="toggle" id="tglIl" aria-pressed="true"><span class="dot"></span>Asteroid breaks</button>
             <button class="toggle" id="tglSpeak" aria-pressed="false"><span class="dot"></span>Read aloud</button>
           </div>
           <div class="vol-row" id="volRow">
@@ -736,6 +737,7 @@
             <li>Wrong meanings can be ignored entirely; let them drift off the bottom. Only letting the <em>correct</em> one fall past costs a shield.</li>
             <li>Answer quickly for a speed bonus; three in a row starts a multiplier, up to ×5.</li>
             <li>Every correct answer can drop an upgrade pod. Fly into it before it falls away.</li>
+            <li>Every fifth sentence, an asteroid field drifts through — nothing to read, just shoot the rocks and dodge them. Big ones break into smaller ones. A collision costs a shield.</li>
             <li>The drift speeds up every four sentences.</li>
           </ul>
         </div>
@@ -1576,7 +1578,8 @@ function renderBoard(el, limit, freshStamp){
 /* ---------- preferences ---------- */
 const pref = Object.assign({
   tier:'pilot', pinyin:true, sound:true, music:true, autoSpeak:false,
-  rate:0.9, musicVol:0.55, chapter:'*', studyMode:'cards', studyReveal:'hide'
+  rate:0.9, musicVol:0.55, interludes:true,
+  chapter:'*', studyMode:'cards', studyReveal:'hide'
 }, lsGet(LS_PREF, {}));
 function savePref(){ lsSet(LS_PREF, pref); }
 
@@ -1606,6 +1609,7 @@ const sfx = {
   shoot: () => tone(700, 380, 0.07, 'square', 0.05),
   good:  () => { tone(420, 900, 0.16, 'triangle', 0.12); setTimeout(()=>tone(720,1180,0.16,'triangle',0.09), 90); },
   bad:   () => tone(200, 70, 0.30, 'sawtooth', 0.10),
+  rock:  () => tone(260, 120, 0.13, 'sawtooth', 0.07),
   pickup:() => { tone(880, 1320, 0.09, 'square', 0.07); setTimeout(()=>tone(1320,1760,0.10,'square',0.05), 70); },
   slip:  () => tone(150, 90, 0.40, 'sine', 0.11),
   over:  () => { tone(300,120,0.5,'sawtooth',0.10); setTimeout(()=>tone(180,70,0.7,'sine',0.10),180); }
@@ -1809,8 +1813,135 @@ const G = {
   ship: {x: 0, w: 44, aimX: null, dir: 0},
   running: false, paused: false, phase: 'idle', lastFire: 0,
   W: 0, H: 0, dpr: 1, qStart: 0, tierCfg: TIERS.pilot,
-  cannon: 1, slowUntil: 0, podsTaken: 0, sinceLastPod: 0
+  cannon: 1, slowUntil: 0, podsTaken: 0, sinceLastPod: 0,
+  rocks: [], invuln: 0, ilUntil: 0, ilSpawn: 0, ilKills: 0, ilAfter: null
 };
+
+/* ---------- asteroid interlude ---------- */
+const ROCK = [
+  {r:11, pts:40, next:null},   // small
+  {r:19, pts:25, next:0},      // medium → 2 small
+  {r:30, pts:15, next:1}       // large  → 2 medium
+];
+const IL_LENGTH = 18000;   // how long the field lasts
+const IL_STOP   = 14000;   // stop seeding new rocks after this, so it clears
+
+function makeRock(x, y, tier, vx, vy){
+  const verts = [];
+  for(let i=0;i<10;i++) verts.push(0.74 + Math.random()*0.5);
+  G.rocks.push({
+    x, y, tier, r: ROCK[tier].r, verts,
+    vx: vx === undefined ? (Math.random()*70 - 35) : vx,
+    vy: vy === undefined ? (78 + Math.random()*70) : vy,
+    spin: Math.random()*Math.PI*2,
+    spinV: (Math.random() - 0.5) * 1.6
+  });
+}
+
+function startInterlude(after){
+  G.ilAfter = after;
+  G.phase = 'interlude';
+  G.rocks = [];
+  G.ilKills = 0;
+  G.ilUntil = performance.now() + IL_LENGTH;
+  G.ilSpawn = 0;
+  MUSIC.intensity(G.wave + 3);
+
+  $('bandTag').textContent = 'INTERLUDE';
+  $('qPinyin').textContent = 'xiǎo xíng xīng dài';
+  $('qPinyin').style.visibility = 'visible';
+  $('qHanzi').classList.remove('term');
+  $('qHanzi').textContent = '小行星带';
+
+  ovBig.textContent = 'Asteroid field';
+  ovSub.textContent = 'No sentence to read — just shoot the rocks, and do not let them hit you. Big ones break into smaller ones.';
+  ovReveal.hidden = true;
+  ovBtns.innerHTML = '';
+  overlay.classList.add('on');
+  setTimeout(() => { if(G.phase === 'interlude') hideOverlay(); }, 1700);
+}
+
+function endInterlude(){
+  const bonus = 150 + G.lives * 60 + G.ilKills * 5;
+  G.score += bonus;
+  floater(G.W/2, G.H * 0.45, 'FIELD CLEAR  +' + bonus, '#E3B45E');
+  G.rocks = [];
+  drawHud();
+  MUSIC.intensity(G.wave);
+  const go = G.ilAfter;
+  G.ilAfter = null;
+  G.phase = 'between';
+  setTimeout(() => { if(G.running && go) go(); }, 1100);
+}
+
+function updateInterlude(dt, now){
+  // seed new rocks
+  if(now < G.ilUntil - (IL_LENGTH - IL_STOP) && now > G.ilSpawn){
+    const gap = Math.max(340, 780 - (G.wave - 1) * 45);
+    G.ilSpawn = now + gap + Math.random() * 260;
+    const roll = Math.random();
+    const tier = roll < 0.45 ? 2 : roll < 0.8 ? 1 : 0;
+    makeRock(30 + Math.random() * (G.W - 60), -40, tier);
+  }
+
+  for(const k of G.rocks){
+    k.x += k.vx * dt; k.y += k.vy * dt; k.spin += k.spinV * dt;
+    if(k.x < k.r){ k.x = k.r; k.vx = Math.abs(k.vx); }
+    if(k.x > G.W - k.r){ k.x = G.W - k.r; k.vx = -Math.abs(k.vx); }
+  }
+  G.rocks = G.rocks.filter(k => k.y < G.H + 60);
+
+  // bullets vs rocks
+  for(let i = G.bullets.length - 1; i >= 0; i--){
+    const b = G.bullets[i];
+    let hit = null;
+    for(const k of G.rocks){
+      const dx = b.x - k.x, dy = b.y - k.y;
+      if(dx*dx + dy*dy < k.r * k.r){ hit = k; break; }
+    }
+    if(hit) { G.bullets.splice(i, 1); breakRock(hit); }
+  }
+
+  // rocks vs ship
+  if(now > G.invuln){
+    const sx = G.ship.x, sy = G.H - 30;
+    for(const k of G.rocks){
+      const dx = sx - k.x, dy = sy - k.y;
+      if(dx*dx + dy*dy < (k.r + 15) * (k.r + 15)){
+        breakRock(k, true);
+        G.lives--;
+        G.invuln = now + 1800;
+        sfx.bad();
+        flashDamage();
+        drawHud();
+        if(G.lives <= 0){ G.phase = 'between'; setTimeout(() => endRun('SHIELDS DOWN'), 700); return; }
+        break;
+      }
+    }
+  }
+
+  if(now > G.ilUntil && !G.rocks.length) endInterlude();
+  else if(now > G.ilUntil + 5000) endInterlude();   // hard stop if rocks keep coming
+}
+
+function breakRock(k, silent){
+  const spec = ROCK[k.tier];
+  const i = G.rocks.indexOf(k);
+  if(i >= 0) G.rocks.splice(i, 1);
+  burst(k.x, k.y, '#B7A98F', k.tier === 2 ? 22 : 14);
+  if(!silent){
+    G.score += spec.pts;
+    G.ilKills++;
+    sfx.rock();
+  }
+  if(spec.next !== null){
+    const sp = 55 + Math.random() * 45;
+    makeRock(k.x - 6, k.y, spec.next, k.vx - sp, k.vy * 0.9 + 20);
+    makeRock(k.x + 6, k.y, spec.next, k.vx + sp, k.vy * 0.9 + 20);
+  }else if(!silent && Math.random() < 0.22){
+    dropPod(k.x, k.y);
+  }
+}
 
 /* ---------- power-up pods ---------- */
 const PODS = {
@@ -1923,6 +2054,7 @@ function startRun(list){
   G.targets.forEach(t => t.el.remove()); G.targets = [];
   G.bullets = []; G.particles = []; G.pods = []; G.floaters = [];
   G.cannon = 1; G.slowUntil = 0; G.podsTaken = 0; G.sinceLastPod = 0;
+  G.rocks = []; G.invuln = 0; G.ilAfter = null; G.ilKills = 0;
   G.running = true; G.paused = false;
   G.tierCfg = TIERS[pref.tier] || TIERS.pilot;
   show('game');
@@ -1938,6 +2070,15 @@ function startRun(list){
 function nextQuestion(){
   G.idx++;
   if(G.idx >= G.order.length){ endRun('CLEARED'); return; }
+  // a breather every five sentences
+  if(pref.interludes && G.idx > 0 && G.idx % 5 === 0){
+    startInterlude(showQuestion);
+    return;
+  }
+  showQuestion();
+}
+
+function showQuestion(){
   const q = G.order[G.idx];
   const cfg = G.tierCfg;
 
@@ -2291,6 +2432,12 @@ function update(dt){
     }
   }
 
+  if(G.phase === 'interlude'){
+    updateInterlude(dt, performance.now());
+    const left = Math.max(0, Math.ceil((G.ilUntil - performance.now()) / 1000));
+    $('qPinyin').textContent = left > 0 ? left + ' seconds of open space' : 'clearing the field';
+  }
+
   // pods
   const sx = G.ship.x, sy = G.H - 34;
   for(const p of G.pods){
@@ -2361,7 +2508,8 @@ function burst(x, y, color, n){
 }
 
 function fire(){
-  if(!G.running || G.paused || G.phase !== 'live') return;
+  if(!G.running || G.paused) return;
+  if(G.phase !== 'live' && G.phase !== 'interlude') return;
   const now = performance.now();
   const cfg = CANNON[G.cannon] || CANNON[1];
   if(now - G.lastFire < cfg.cooldown) return;
@@ -2393,8 +2541,33 @@ function render(now){
   }
   ctx.restore();
 
+  // asteroids
+  for(const k of G.rocks){
+    ctx.save();
+    ctx.translate(k.x, k.y);
+    ctx.rotate(k.spin);
+    ctx.beginPath();
+    for(let i=0;i<k.verts.length;i++){
+      const a = (i / k.verts.length) * Math.PI * 2;
+      const rr = k.r * k.verts[i];
+      const px = Math.cos(a) * rr, py = Math.sin(a) * rr;
+      i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = '#17201F';
+    ctx.fill();
+    ctx.lineWidth = k.tier === 2 ? 2 : 1.5;
+    ctx.strokeStyle = '#9C8F79';
+    ctx.stroke();
+    // a couple of craters so it reads as rock, not a blob
+    ctx.fillStyle = 'rgba(156,143,121,.22)';
+    ctx.beginPath(); ctx.arc(-k.r*0.25, -k.r*0.15, k.r*0.2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(k.r*0.3, k.r*0.25, k.r*0.13, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
   // ship
-  if(G.running){
+  if(G.running && !(now < G.invuln && Math.floor(now / 110) % 2)){
     const x = G.ship.x, y = G.H - 34;
     ctx.save();
     ctx.translate(x, y);
@@ -2589,6 +2762,7 @@ function refreshStart(){
   $('tglSound').setAttribute('aria-pressed', String(!!pref.sound));
   $('tglSpeak').setAttribute('aria-pressed', String(!!pref.autoSpeak));
   $('tglMusic').setAttribute('aria-pressed', String(!!pref.music));
+  $('tglIl').setAttribute('aria-pressed', String(!!pref.interludes));
   const pct = Math.round((pref.musicVol == null ? 0.55 : pref.musicVol) * 100);
   const vs = $('musicVol');
   vs.value = pct;
@@ -2630,6 +2804,7 @@ document.querySelectorAll('.tier').forEach(b => {
 });
 $('tglPinyin').addEventListener('click', () => { pref.pinyin = !pref.pinyin; savePref(); refreshStart(); });
 $('tglSound').addEventListener('click', () => { pref.sound = !pref.sound; savePref(); refreshStart(); if(pref.sound) sfx.shoot(); });
+$('tglIl').addEventListener('click', () => { pref.interludes = !pref.interludes; savePref(); refreshStart(); });
 $('tglMusic').addEventListener('click', () => {
   pref.music = !pref.music; savePref(); refreshStart();
   if(pref.music) previewMusic();
