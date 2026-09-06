@@ -1,0 +1,2653 @@
+<title>Hanzi Interceptor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;600&display=swap">
+
+<style>
+  :root{
+    --void:#070C0F;
+    --deep:#0B1317;
+    --panel:#101D24;
+    --panel2:#15262E;
+    --line:#203A44;
+    --line-hi:#2E5560;
+    --ink:#EAE6D9;
+    --muted:#93A9AB;
+    --dim:#5F7679;
+    --verd:#3FD9AE;
+    --verd-deep:#12574A;
+    --ember:#FF6A45;
+    --brass:#E3B45E;
+    --hud:'Chakra Petch', 'Segoe UI', system-ui, sans-serif;
+    --body:'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+    --han:'Noto Serif SC', 'Songti SC', 'SimSun', serif;
+    --r:4px;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 700px at 50% -10%, #12242B 0%, rgba(18,36,43,0) 62%),
+      var(--void);
+    color:var(--ink);
+    font-family:var(--body);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .shell{
+    max-width:1120px;
+    margin:0 auto;
+    padding:22px 20px 30px;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .screen{display:none; flex:1; flex-direction:column; gap:18px}
+  .screen.on{display:flex}
+
+  /* ---------- shared type ---------- */
+  .eyebrow{
+    font-family:var(--hud);
+    font-size:.7rem;
+    font-weight:600;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--verd);
+  }
+  .eyebrow .sep{color:var(--dim); margin:0 .5em}
+  h1{
+    font-family:var(--hud);
+    font-weight:700;
+    font-size:clamp(2.1rem, 6vw, 3.4rem);
+    letter-spacing:.01em;
+    line-height:.98;
+    margin:.28em 0 0;
+    text-wrap:balance;
+  }
+  h1 .glow{color:var(--verd); text-shadow:0 0 26px rgba(63,217,174,.35)}
+  .lede{
+    margin:14px 0 0;
+    max-width:56ch;
+    color:var(--muted);
+    font-size:1.02rem;
+    line-height:1.55;
+  }
+  .lede b{color:var(--ink); font-weight:500}
+
+  /* ---------- buttons ---------- */
+  button{font:inherit; color:inherit; cursor:pointer}
+  .btn{
+    font-family:var(--hud);
+    font-weight:600;
+    letter-spacing:.11em;
+    text-transform:uppercase;
+    font-size:.82rem;
+    padding:13px 22px;
+    background:var(--panel);
+    border:1px solid var(--line-hi);
+    border-radius:var(--r);
+    transition:background .16s, border-color .16s, transform .1s;
+  }
+  .btn:hover{background:var(--panel2); border-color:var(--verd)}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{
+    background:linear-gradient(180deg, #1E7A66, #14584A);
+    border-color:#3FD9AE;
+    color:#EAFFF8;
+    box-shadow:0 0 0 1px rgba(63,217,174,.14), 0 8px 26px -14px rgba(63,217,174,.8);
+  }
+  .btn.primary:hover{background:linear-gradient(180deg, #24927A, #176856)}
+  .btn.ghost{background:transparent; border-color:var(--line)}
+  .btn.ghost:hover{border-color:var(--line-hi); background:rgba(255,255,255,.02)}
+  .btn.tiny{padding:7px 12px; font-size:.68rem; letter-spacing:.09em}
+  .btn.danger:hover{border-color:var(--ember); color:#FFD9CF}
+  :focus-visible{outline:2px solid var(--verd); outline-offset:2px}
+
+  /* ---------- start screen ---------- */
+  .start-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);
+    gap:26px;
+    align-items:start;
+    margin-top:6px;
+  }
+  @media (max-width:820px){ .start-grid{grid-template-columns:1fr} }
+
+  .console{
+    background:linear-gradient(180deg, rgba(21,38,46,.9), rgba(13,24,29,.9));
+    border:1px solid var(--line);
+    border-radius:var(--r);
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .field-label{
+    font-family:var(--hud);
+    font-size:.68rem;
+    letter-spacing:.19em;
+    text-transform:uppercase;
+    color:var(--dim);
+    display:block;
+    margin-bottom:9px;
+  }
+  .tiers{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+  .tier{
+    background:rgba(8,15,18,.6);
+    border:1px solid var(--line);
+    border-radius:var(--r);
+    padding:11px 10px;
+    text-align:left;
+    line-height:1.25;
+  }
+  .tier .n{
+    display:block;
+    font-family:var(--hud);
+    font-weight:600;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    font-size:.78rem;
+  }
+  .tier .d{display:block; font-size:.72rem; color:var(--dim); margin-top:4px}
+  .tier[aria-pressed="true"]{
+    border-color:var(--verd);
+    background:rgba(63,217,174,.09);
+  }
+  .tier[aria-pressed="true"] .n{color:var(--verd)}
+
+  select{
+    width:100%;
+    font-family:var(--body);
+    font-size:.92rem;
+    color:var(--ink);
+    background:rgba(8,15,18,.7);
+    border:1px solid var(--line);
+    border-radius:var(--r);
+    padding:11px 12px;
+  }
+  .toggles{display:flex; gap:8px; flex-wrap:wrap}
+  .toggle{
+    display:flex; align-items:center; gap:9px;
+    background:rgba(8,15,18,.6);
+    border:1px solid var(--line);
+    border-radius:var(--r);
+    padding:10px 13px;
+    font-size:.83rem;
+    color:var(--muted);
+  }
+  .toggle .dot{
+    width:9px; height:9px; border-radius:50%;
+    background:var(--dim);
+    box-shadow:0 0 0 3px rgba(255,255,255,.03);
+  }
+  .toggle[aria-pressed="true"]{color:var(--ink); border-color:var(--line-hi)}
+  .toggle[aria-pressed="true"] .dot{background:var(--verd); box-shadow:0 0 10px rgba(63,217,174,.7)}
+
+  .launch-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:2px}
+
+  .specimen{
+    border:1px solid var(--line);
+    border-left:2px solid var(--verd);
+    border-radius:var(--r);
+    background:rgba(8,15,18,.5);
+    padding:16px 18px;
+  }
+  .specimen .cap{
+    font-family:var(--hud); font-size:.64rem; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--dim); margin-bottom:10px;
+  }
+  .keys{display:flex; flex-wrap:wrap; gap:8px; margin-top:4px}
+  .key{
+    font-family:var(--hud); font-size:.7rem; letter-spacing:.08em;
+    color:var(--muted);
+    border:1px solid var(--line); border-radius:3px;
+    padding:5px 9px; background:rgba(8,15,18,.6);
+  }
+  .key b{color:var(--verd); font-weight:600}
+  .speak-btn{
+    position:absolute; top:10px; right:10px; z-index:3;
+    width:36px; height:36px; display:grid; place-items:center;
+    background:rgba(8,15,18,.72); border:1px solid var(--line-hi);
+    border-radius:var(--r); color:var(--verd);
+    transition:background .15s, border-color .15s, color .15s;
+  }
+  .speak-btn:hover{background:rgba(63,217,174,.14); border-color:var(--verd)}
+  .speak-btn:disabled{opacity:.32; cursor:not-allowed; color:var(--dim); border-color:var(--line); background:transparent}
+  .speak-btn.talking{background:rgba(63,217,174,.2); border-color:var(--verd)}
+  .speak-btn svg{width:17px; height:17px; display:block}
+  .speak-btn.mini{position:static; width:30px; height:30px; margin-top:10px}
+  .speak-btn.mini svg{width:14px; height:14px}
+
+  .stat-line{
+    font-family:var(--hud); font-size:.72rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--dim);
+  }
+  .stat-line b{color:var(--brass); font-weight:600}
+
+  /* ---------- HUD ---------- */
+  .hud{
+    display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+    border:1px solid var(--line);
+    border-radius:var(--r);
+    background:linear-gradient(180deg, rgba(21,38,46,.75), rgba(11,20,24,.75));
+    padding:10px 14px;
+  }
+  .hud-cell{display:flex; align-items:baseline; gap:8px}
+  .hud-k{
+    font-family:var(--hud); font-size:.64rem; letter-spacing:.19em;
+    text-transform:uppercase; color:var(--dim);
+  }
+  .hud-v{
+    font-family:var(--hud); font-weight:600; font-size:1.05rem;
+    font-variant-numeric:tabular-nums; letter-spacing:.03em;
+  }
+  #hudScore{color:var(--brass)}
+  #hudStreak{color:var(--verd)}
+  .pips{display:flex; gap:5px}
+  .pip{
+    width:22px; height:7px; border-radius:2px;
+    background:var(--verd);
+    box-shadow:0 0 10px rgba(63,217,174,.5);
+  }
+  .pip.off{background:#22343A; box-shadow:none}
+  .pip.cannon{width:14px; background:var(--brass); box-shadow:0 0 10px rgba(227,180,94,.5)}
+  .pip.cannon.off{background:#22343A; box-shadow:none}
+
+  /* ---------- roll of honour ---------- */
+  .board{display:flex; flex-direction:column; gap:5px}
+  .board-row{
+    display:grid;
+    grid-template-columns:26px minmax(0,1fr) auto;
+    align-items:baseline;
+    gap:12px;
+    padding:8px 11px;
+    border:1px solid transparent;
+    border-left:2px solid var(--line);
+    background:rgba(8,15,18,.5);
+    border-radius:3px;
+  }
+  .board-row .rk{
+    font-family:var(--hud); font-weight:700; font-size:.85rem;
+    color:var(--dim); font-variant-numeric:tabular-nums; text-align:right;
+  }
+  .board-row .nm{font-size:.92rem; font-weight:500; color:var(--ink); overflow-wrap:anywhere}
+  .board-row .meta{
+    display:block; font-size:.68rem; color:var(--dim); margin-top:3px;
+    font-family:var(--hud); letter-spacing:.09em; text-transform:uppercase;
+  }
+  .board-row .sc{
+    font-family:var(--hud); font-weight:700; font-size:1.02rem;
+    color:var(--brass); font-variant-numeric:tabular-nums;
+  }
+  .board-row.top1{border-left-color:var(--brass); background:rgba(227,180,94,.07)}
+  .board-row.top1 .rk{color:var(--brass)}
+  .board-row.fresh{border-left-color:var(--verd); background:rgba(63,217,174,.09)}
+  .board-row.fresh .rk{color:var(--verd)}
+  .board-empty{
+    border:1px dashed var(--line); border-radius:3px; padding:16px;
+    text-align:center; color:var(--dim); font-size:.84rem;
+  }
+  .board-head{display:flex; align-items:baseline; gap:10px; margin-bottom:12px}
+  .board-head .sp{flex:1}
+
+  .newhigh{
+    border:1px solid var(--verd); border-radius:var(--r);
+    background:rgba(63,217,174,.08);
+    padding:16px 18px; display:flex; flex-wrap:wrap; align-items:center; gap:12px;
+  }
+  .newhigh .txt{
+    font-family:var(--hud); font-weight:600; letter-spacing:.12em;
+    text-transform:uppercase; font-size:.84rem; color:var(--verd);
+  }
+  .newhigh input{margin:0; max-width:230px}
+
+  /* ---------- study mode ---------- */
+  .study-bar{display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end}
+  .study-bar > div{min-width:180px}
+  .study-bar .grow{flex:1; min-width:220px}
+  .seg{display:inline-flex; border:1px solid var(--line); border-radius:var(--r); overflow:hidden}
+  .seg button{
+    font-family:var(--hud); font-size:.7rem; font-weight:600; letter-spacing:.11em;
+    text-transform:uppercase; padding:11px 15px; background:rgba(8,15,18,.6);
+    border:0; border-right:1px solid var(--line); color:var(--muted);
+  }
+  .seg button:last-child{border-right:0}
+  .seg button[aria-pressed="true"]{background:rgba(63,217,174,.12); color:var(--verd)}
+  .seg button:disabled{opacity:.35; cursor:not-allowed}
+
+  .study-card{
+    border:1px solid var(--line);
+    border-top:2px solid var(--verd-deep);
+    border-radius:var(--r);
+    background:linear-gradient(180deg, rgba(18,33,40,.9), rgba(10,18,22,.9));
+    padding:28px 26px 24px;
+    position:relative;
+    text-align:center;
+    display:flex; flex-direction:column; gap:6px;
+    min-height:300px;
+  }
+  .study-count{
+    font-family:var(--hud); font-size:.64rem; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--dim);
+  }
+  .study-card .hanzi{margin-top:10px}
+  .study-meaning{
+    margin-top:22px; padding-top:20px;
+    border-top:1px dashed var(--line);
+    font-size:1.14rem; line-height:1.6; color:var(--ink);
+    max-width:60ch; margin-left:auto; margin-right:auto;
+  }
+  .study-meaning.veiled{color:transparent; text-shadow:0 0 16px rgba(234,230,217,.42); user-select:none}
+  .study-nav{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:auto; padding-top:22px}
+  .study-progress{height:3px; background:rgba(32,58,68,.7); border-radius:2px; overflow:hidden; margin-top:14px}
+  .study-progress i{display:block; height:100%; background:var(--verd); transition:width .2s}
+
+  .study-list{display:flex; flex-direction:column; gap:8px}
+  .study-row{
+    display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;
+    gap:16px; align-items:start;
+    border:1px solid var(--line); border-left:2px solid var(--line-hi);
+    border-radius:3px; background:rgba(11,20,24,.6); padding:13px 15px;
+  }
+  @media (max-width:760px){ .study-row{grid-template-columns:minmax(0,1fr) auto} .study-row .en-cell{grid-column:1 / -1} }
+  .study-row .py{font-size:.74rem; letter-spacing:.07em; color:var(--verd); opacity:.82; margin-bottom:4px}
+  .study-row .zh{font-family:var(--han); font-size:1.1rem; line-height:1.5}
+  .study-row .en-cell{font-size:.92rem; line-height:1.55; color:var(--muted)}
+  .study-sec{
+    font-family:var(--hud); font-size:.66rem; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--verd); margin:20px 0 10px; padding-bottom:7px; border-bottom:1px solid var(--line);
+  }
+  .study-sec:first-child{margin-top:0}
+
+  .pods-legend{display:flex; flex-direction:column; gap:9px; margin-top:2px}
+  .pod-row{display:flex; align-items:center; gap:11px; font-size:.82rem; color:var(--muted); line-height:1.4}
+  .pod-chip{
+    flex:none; width:26px; height:26px; display:grid; place-items:center;
+    font-family:var(--hud); font-weight:700; font-size:.78rem;
+    border:1.5px solid currentColor; border-radius:3px;
+    background:rgba(9,17,21,.7);
+  }
+  .pod-row b{color:var(--ink); font-weight:600}
+  .hud-sp{flex:1}
+
+  /* ---------- question band ---------- */
+  .band{
+    border:1px solid var(--line);
+    border-top:2px solid var(--verd-deep);
+    border-radius:var(--r);
+    background:linear-gradient(180deg, rgba(18,33,40,.9), rgba(10,18,22,.9));
+    padding:16px 18px 18px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .band::after{
+    content:''; position:absolute; inset:0;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px);
+    pointer-events:none;
+  }
+  .band-tag{
+    font-family:var(--hud); font-size:.62rem; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--dim);
+  }
+  .pinyin{
+    font-size:clamp(.74rem, 2vw, .95rem);
+    letter-spacing:.09em;
+    color:var(--verd);
+    opacity:.85;
+    margin-top:10px;
+    min-height:1.2em;
+  }
+  .hanzi{
+    font-family:var(--han);
+    font-weight:600;
+    font-size:clamp(1.45rem, 4.6vw, 2.35rem);
+    letter-spacing:.05em;
+    line-height:1.42;
+    margin-top:6px;
+    text-wrap:balance;
+  }
+  /* a single vocabulary term gets room to breathe */
+  .hanzi.term{
+    font-size:clamp(2rem, 7.5vw, 3.3rem);
+    letter-spacing:.16em;
+    line-height:1.3;
+  }
+  .term-flag{
+    display:inline-block; margin-left:.7em; vertical-align:middle;
+    font-family:var(--hud); font-size:.56rem; font-weight:600;
+    letter-spacing:.18em; text-transform:uppercase; color:var(--brass);
+    border:1px solid rgba(227,180,94,.45); border-radius:2px; padding:2px 6px;
+  }
+
+  /* ---------- playfield ---------- */
+  .field{
+    position:relative;
+    flex:1;
+    min-height:390px;
+    border:1px solid var(--line);
+    border-radius:var(--r);
+    background:
+      linear-gradient(180deg, rgba(9,17,21,.2), rgba(7,13,16,.85)),
+      var(--deep);
+    overflow:hidden;
+    touch-action:none;
+    cursor:crosshair;
+  }
+  #fx{position:absolute; inset:0; width:100%; height:100%; display:block}
+
+  .target{
+    position:absolute; top:0; left:0;
+    padding:12px 13px;
+    background:linear-gradient(180deg, rgba(24,45,54,.96), rgba(14,27,33,.96));
+    border:1px solid var(--line-hi);
+    border-radius:3px;
+    font-size:.88rem;
+    line-height:1.38;
+    color:var(--ink);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+    will-change:transform;
+    -webkit-user-select:none; user-select:none;
+  }
+  .target::before{
+    content:''; position:absolute; left:-1px; top:9px; bottom:9px; width:2px;
+    background:var(--line-hi);
+  }
+  .target.hot::before{background:var(--verd)}
+  .target.hit-ok{
+    border-color:var(--verd);
+    background:linear-gradient(180deg, rgba(31,110,92,.95), rgba(16,64,54,.95));
+    animation:pop .34s ease-out forwards;
+  }
+  .target.hit-bad{
+    border-color:var(--ember);
+    background:linear-gradient(180deg, rgba(120,44,28,.95), rgba(70,24,15,.95));
+    animation:pop .34s ease-out forwards;
+  }
+  .target.fade{animation:fadeout .3s ease-in forwards}
+  @keyframes pop{
+    0%{transform:var(--tf) scale(1)}
+    35%{transform:var(--tf) scale(1.07)}
+    100%{transform:var(--tf) scale(.9); opacity:0}
+  }
+  @keyframes fadeout{to{opacity:0}}
+
+  .hull{
+    position:absolute; left:0; right:0; bottom:58px; height:1px;
+    background:repeating-linear-gradient(90deg, var(--line-hi) 0 10px, transparent 10px 20px);
+    pointer-events:none;
+  }
+  .flash{
+    position:absolute; inset:0; pointer-events:none; opacity:0;
+    box-shadow:inset 0 0 90px 10px rgba(255,106,69,.65);
+  }
+  .flash.on{animation:flash .45s ease-out}
+  @keyframes flash{0%{opacity:1} 100%{opacity:0}}
+  .shake{animation:shake .3s}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-7px)}
+    45%{transform:translateX(6px)}
+    70%{transform:translateX(-3px)}
+  }
+
+  .overlay{
+    position:absolute; inset:0;
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px; text-align:center; padding:24px;
+    background:rgba(7,13,16,.86);
+    backdrop-filter:blur(2px);
+  }
+  .overlay.on{display:flex}
+  .overlay .big{
+    font-family:var(--hud); font-weight:700; letter-spacing:.14em;
+    text-transform:uppercase; font-size:1.5rem;
+  }
+  .overlay .sub{color:var(--muted); font-size:.92rem; max-width:44ch}
+  .reveal-en{
+    font-size:1.05rem; color:var(--ink); max-width:46ch;
+    border-left:2px solid var(--verd); padding-left:14px; text-align:left;
+  }
+
+  /* ---------- debrief ---------- */
+  .score-hero{
+    display:flex; align-items:flex-end; gap:26px; flex-wrap:wrap;
+    border:1px solid var(--line); border-radius:var(--r);
+    background:linear-gradient(180deg, rgba(21,38,46,.7), rgba(11,20,24,.7));
+    padding:22px;
+  }
+  .score-hero .num{
+    font-family:var(--hud); font-weight:700; font-size:clamp(3rem,10vw,4.6rem);
+    line-height:.9; color:var(--brass); font-variant-numeric:tabular-nums;
+  }
+  .metrics{display:flex; gap:26px; flex-wrap:wrap}
+  .metric .k{
+    font-family:var(--hud); font-size:.64rem; letter-spacing:.19em;
+    text-transform:uppercase; color:var(--dim);
+  }
+  .metric .v{
+    font-family:var(--hud); font-weight:600; font-size:1.3rem;
+    font-variant-numeric:tabular-nums; margin-top:3px;
+  }
+
+  .log{display:flex; flex-direction:column; gap:10px}
+  .log-item{
+    display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px;
+    border:1px solid var(--line); border-left:2px solid var(--ember);
+    border-radius:var(--r); background:rgba(15,26,32,.6); padding:14px 16px;
+  }
+  @media (max-width:700px){ .log-item{grid-template-columns:1fr; gap:10px} }
+  .log-han{font-family:var(--han); font-size:1.2rem; letter-spacing:.04em; line-height:1.45}
+  .log-py{font-size:.76rem; letter-spacing:.07em; color:var(--verd); opacity:.8; margin-bottom:5px}
+  .log-k{
+    font-family:var(--hud); font-size:.6rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--dim); display:block; margin-bottom:4px;
+  }
+  .log-ok{color:var(--ink); font-size:.95rem; line-height:1.45}
+  .log-no{color:#C79184; font-size:.86rem; line-height:1.45; margin-top:9px; text-decoration:line-through; text-decoration-color:rgba(255,106,69,.5)}
+
+  /* ---------- library ---------- */
+  .lib-head{display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap}
+  .lib-grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; align-items:start}
+  @media (max-width:900px){ .lib-grid{grid-template-columns:1fr} }
+  .card{
+    border:1px solid var(--line); border-radius:var(--r);
+    background:linear-gradient(180deg, rgba(19,33,40,.7), rgba(11,20,24,.7));
+    padding:18px;
+  }
+  .card h3{
+    font-family:var(--hud); font-size:.76rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--verd); margin:0 0 14px; font-weight:600;
+  }
+  input[type=text], textarea{
+    width:100%; font-family:var(--body); font-size:.9rem; color:var(--ink);
+    background:rgba(8,15,18,.75); border:1px solid var(--line);
+    border-radius:var(--r); padding:10px 12px; margin-bottom:10px;
+  }
+  textarea{resize:vertical; line-height:1.5}
+  input::placeholder, textarea::placeholder{color:#4E6265}
+  .mono{font-family:'Chakra Petch', ui-monospace, monospace; font-size:.82rem; letter-spacing:.02em}
+  .hint{font-size:.78rem; color:var(--dim); line-height:1.5; margin:0 0 12px}
+  .hint code{color:var(--brass); font-family:var(--hud); font-size:.82rem}
+
+  .q-list{display:flex; flex-direction:column; gap:8px; max-height:460px; overflow-y:auto; padding-right:4px}
+  .q-row{
+    display:flex; align-items:flex-start; gap:12px;
+    border:1px solid var(--line); border-radius:3px;
+    background:rgba(8,15,18,.5); padding:11px 12px;
+  }
+  .q-row .txt{flex:1; min-width:0}
+  .q-row .zh{font-family:var(--han); font-size:1rem; line-height:1.4}
+  .q-row .en{font-size:.82rem; color:var(--muted); margin-top:3px; line-height:1.4}
+  .q-row .tg{
+    font-family:var(--hud); font-size:.6rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--dim); border:1px solid var(--line); border-radius:2px; padding:2px 6px; margin-top:6px;
+    display:inline-block;
+  }
+  .empty{color:var(--dim); font-size:.88rem; padding:18px 0; text-align:center}
+
+  .foot{
+    margin-top:auto; padding-top:20px;
+    font-size:.75rem; color:var(--dim); line-height:1.6;
+    border-top:1px solid rgba(32,58,68,.6);
+  }
+
+  @media (max-width:560px){
+    .shell{padding:12px 12px 16px}
+    .hud{gap:12px 14px; padding:9px 11px}
+    .hud-k{font-size:.58rem; letter-spacing:.14em}
+    .hud-v{font-size:.92rem}
+    .hud-cell.opt{display:none}
+    .band{padding:11px 12px 13px}
+    .hanzi{line-height:1.32; margin-top:4px}
+    .field{min-height:340px}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms !important; animation-iteration-count:1 !important}
+  }
+</style>
+
+<div class="shell">
+
+  <!-- ============ START ============ -->
+  <section class="screen on" id="scStart">
+    <header>
+      <div class="eyebrow">华文理解 <span class="sep">/</span> sentence comprehension drill</div>
+      <h1>Hanzi <span class="glow">Interceptor</span></h1>
+      <p class="lede">A sentence comes up on the display and its possible meanings drift down the screen. <b>Shoot the one that matches</b> before the right answer slips past you — hit a wrong one and it costs a shield. Every hit can drop an upgrade pod worth flying for.</p>
+    </header>
+
+    <div class="start-grid">
+      <div class="console">
+        <div>
+          <span class="field-label">Flight level</span>
+          <div class="tiers" id="tiers">
+            <button class="tier" data-tier="cadet" aria-pressed="false"><span class="n">Cadet</span><span class="d">3 options · slow drift</span></button>
+            <button class="tier" data-tier="pilot" aria-pressed="true"><span class="n">Pilot</span><span class="d">4 options · standard</span></button>
+            <button class="tier" data-tier="ace" aria-pressed="false"><span class="n">Ace</span><span class="d">4 options · fast · no pinyin</span></button>
+          </div>
+        </div>
+
+        <div>
+          <span class="field-label">Sentence set</span>
+          <select id="chapterSel"><option value="*">All sentences</option></select>
+        </div>
+
+        <div>
+          <span class="field-label">Display</span>
+          <div class="toggles">
+            <button class="toggle" id="tglPinyin" aria-pressed="true"><span class="dot"></span>Pinyin</button>
+            <button class="toggle" id="tglSound" aria-pressed="true"><span class="dot"></span>Sound</button>
+            <button class="toggle" id="tglMusic" aria-pressed="true"><span class="dot"></span>Music</button>
+            <button class="toggle" id="tglSpeak" aria-pressed="false"><span class="dot"></span>Read aloud</button>
+          </div>
+          <div class="hint" id="voiceNote" style="margin:9px 0 0"></div>
+        </div>
+
+        <div id="rateWrap">
+          <span class="field-label">Reading speed</span>
+          <div class="seg" id="rateSeg">
+            <button data-rate="0.55" aria-pressed="false">Very slow</button>
+            <button data-rate="0.72" aria-pressed="false">Slow</button>
+            <button data-rate="0.9" aria-pressed="true">Normal</button>
+          </div>
+        </div>
+
+        <div class="launch-row">
+          <button class="btn primary" id="btnLaunch">Launch</button>
+          <button class="btn" id="btnStudy">Study first</button>
+          <button class="btn ghost" id="btnLibrary">Sentence library</button>
+        </div>
+
+        <div class="stat-line" id="startStats">—</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:14px">
+        <div class="specimen">
+          <div class="cap">Sample target</div>
+          <div class="pinyin" id="specPy">shí jiān guò de zhēn kuài</div>
+          <div class="hanzi" id="specZh" style="font-size:1.5rem; text-align:left">时间过得真快</div>
+        </div>
+        <div class="specimen" style="border-left-color:var(--line)">
+          <div class="cap">Controls</div>
+          <div class="keys">
+            <span class="key"><b>←</b> <b>→</b> move</span>
+            <span class="key"><b>A</b> <b>D</b> move</span>
+            <span class="key"><b>SPACE</b> fire</span>
+            <span class="key"><b>L</b> hear the sentence</span>
+            <span class="key"><b>P</b> pause</span>
+            <span class="key">drag &amp; tap on touch</span>
+          </div>
+        </div>
+        <div class="specimen" style="border-left-color:var(--verd)">
+          <div class="cap">Upgrade pods — fly into them to collect</div>
+          <div class="pods-legend">
+            <div class="pod-row"><span class="pod-chip" style="color:#3FD9AE">C</span><span><b>Cannon</b> — up to three levels. Faster, wider fire. A wrong shot knocks it back one level.</span></div>
+            <div class="pod-row"><span class="pod-chip" style="color:#E3B45E">+</span><span><b>Shield</b> — repairs one shield.</span></div>
+            <div class="pod-row"><span class="pod-chip" style="color:#6FB3E0">T</span><span><b>Slow-mo</b> — the answers drift at half speed for eight seconds.</span></div>
+            <div class="pod-row"><span class="pod-chip" style="color:#B98CE0">X</span><span><b>Scan</b> — burns away one wrong answer. The 50/50 lifeline.</span></div>
+            <div class="pod-row"><span class="pod-chip" style="color:#FF9F4A">★</span><span><b>Bonus</b> — 300 points.</span></div>
+          </div>
+        </div>
+        <div class="specimen" style="border-left-color:var(--brass)">
+          <div class="cap">Rules of engagement</div>
+          <ul style="margin:0; padding-left:18px; color:var(--muted); font-size:.86rem; line-height:1.75">
+            <li>Three shields. A wrong meaning shot costs one.</li>
+            <li>Every meaning falls in its own lane, so the right one is never hidden behind a wrong one — line up under it and fire.</li>
+            <li>Wrong meanings can be ignored entirely; let them drift off the bottom. Only letting the <em>correct</em> one fall past costs a shield.</li>
+            <li>Answer quickly for a speed bonus; three in a row starts a multiplier, up to ×5.</li>
+            <li>Every correct answer can drop an upgrade pod. Fly into it before it falls away.</li>
+            <li>The drift speeds up every four sentences.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="console" id="boardPanel">
+        <div class="board-head">
+          <span class="eyebrow">Roll of honour</span>
+          <span class="sp"></span>
+          <button class="btn tiny ghost danger" id="btnClearBoard">Clear</button>
+        </div>
+        <div class="board" id="startBoard"></div>
+      </div>
+    </div>
+
+    <div class="foot">
+      Built for revision, not for grinding — a run is one pass through the set, and every sentence you miss is listed afterwards with its correct meaning so it can be read properly.
+    </div>
+  </section>
+
+  <!-- ============ GAME ============ -->
+  <section class="screen" id="scGame">
+    <div class="hud">
+      <div class="hud-cell"><span class="hud-k">Shields</span><span class="pips" id="hudPips"></span></div>
+      <div class="hud-cell"><span class="hud-k">Cannon</span><span class="pips" id="hudCannon"></span></div>
+      <div class="hud-cell"><span class="hud-k">Score</span><span class="hud-v" id="hudScore">0</span></div>
+      <div class="hud-cell"><span class="hud-k">Streak</span><span class="hud-v" id="hudStreak">×1</span></div>
+      <div class="hud-cell opt"><span class="hud-k">Wave</span><span class="hud-v" id="hudWave">1</span></div>
+      <div class="hud-sp"></div>
+      <div class="hud-cell"><span class="hud-k" id="hudProgK">Sentence</span><span class="hud-v" id="hudProg">1/1</span></div>
+      <button class="btn tiny ghost" id="btnPause">Pause</button>
+      <button class="btn tiny ghost" id="btnAbort">Abort</button>
+    </div>
+
+    <div class="band">
+      <button class="speak-btn" id="btnSpeak" aria-label="Read the sentence aloud" title="Read the sentence aloud (L)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.4 8.6a5 5 0 0 1 0 6.8"/><path d="M18.6 5.4a9 9 0 0 1 0 13.2"/></svg>
+      </button>
+      <div class="band-tag" id="bandTag">SET</div>
+      <div class="pinyin" id="qPinyin"></div>
+      <div class="hanzi" id="qHanzi"></div>
+    </div>
+
+    <div class="field" id="field">
+      <canvas id="fx"></canvas>
+      <div class="hull"></div>
+      <div class="flash" id="flash"></div>
+      <div class="overlay" id="overlay">
+        <div class="big" id="ovBig"></div>
+        <div class="sub" id="ovSub"></div>
+        <div class="reveal-en" id="ovReveal" hidden></div>
+        <div class="launch-row" id="ovBtns"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DEBRIEF ============ -->
+  <section class="screen" id="scDebrief">
+    <div class="eyebrow" id="dbTitle">Debrief</div>
+    <div class="score-hero">
+      <div>
+        <div class="hud-k" style="font-family:var(--hud); font-size:.64rem; letter-spacing:.19em; text-transform:uppercase; color:var(--dim)">Final score</div>
+        <div class="num" id="dbScore">0</div>
+      </div>
+      <div class="metrics" style="padding-bottom:6px">
+        <div class="metric"><div class="k">Correct</div><div class="v" id="dbCorrect">0/0</div></div>
+        <div class="metric"><div class="k">Accuracy</div><div class="v" id="dbAcc">0%</div></div>
+        <div class="metric"><div class="k">Best streak</div><div class="v" id="dbStreak">0</div></div>
+        <div class="metric"><div class="k">Personal best</div><div class="v" id="dbBest">0</div></div>
+      </div>
+    </div>
+
+    <div class="newhigh" id="newHigh" hidden>
+      <span class="txt" id="newHighTxt">New high score</span>
+      <input type="text" id="newHighName" maxlength="14" placeholder="Pilot name" style="flex:1; min-width:150px">
+      <button class="btn primary" id="btnSaveScore">Save</button>
+    </div>
+
+    <div class="launch-row">
+      <button class="btn primary" id="btnAgain">Fly again</button>
+      <button class="btn" id="btnDrill">Drill the misses</button>
+      <button class="btn" id="btnStudyMisses">Study the misses</button>
+      <button class="btn ghost" id="btnHome">Back to base</button>
+    </div>
+
+    <div id="dbBoardWrap">
+      <div class="board-head"><span class="eyebrow">Roll of honour</span></div>
+      <div class="board" id="dbBoard"></div>
+    </div>
+
+    <div id="dbLogWrap">
+      <div class="eyebrow" style="margin-bottom:12px">Review log</div>
+      <div class="log" id="dbLog"></div>
+    </div>
+  </section>
+
+  <!-- ============ STUDY ============ -->
+  <section class="screen" id="scStudy">
+    <div class="lib-head">
+      <div>
+        <div class="eyebrow">Study mode</div>
+        <h1 style="font-size:clamp(1.6rem,4vw,2.2rem)">Read before you fly</h1>
+      </div>
+      <div style="flex:1"></div>
+      <button class="btn ghost" id="btnStudyBack">Back to base</button>
+    </div>
+
+    <div class="console">
+      <div class="study-bar">
+        <div class="grow">
+          <span class="field-label">Section</span>
+          <select id="studySel"></select>
+        </div>
+        <div>
+          <span class="field-label">View</span>
+          <div class="seg" id="studyModeSeg">
+            <button data-mode="cards" aria-pressed="true">Cards</button>
+            <button data-mode="list" aria-pressed="false">All at once</button>
+          </div>
+        </div>
+        <div>
+          <span class="field-label">Meanings</span>
+          <div class="seg" id="studyRevealSeg">
+            <button data-reveal="hide" aria-pressed="true">Hide first</button>
+            <button data-reveal="show" aria-pressed="false">Always show</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="studyCards">
+      <div class="study-card">
+        <button class="speak-btn" id="btnStudySpeak" aria-label="Read this sentence aloud" title="Read this sentence aloud (L)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.4 8.6a5 5 0 0 1 0 6.8"/><path d="M18.6 5.4a9 9 0 0 1 0 13.2"/></svg>
+        </button>
+        <div class="study-count" id="studyCount">1 / 1</div>
+        <div class="pinyin" id="studyPy"></div>
+        <div class="hanzi" id="studyZh"></div>
+        <div class="study-meaning veiled" id="studyEn"></div>
+        <div class="study-nav">
+          <button class="btn ghost" id="btnStudyPrev">← Previous</button>
+          <button class="btn primary" id="btnStudyReveal">Show meaning</button>
+          <button class="btn ghost" id="btnStudyNext">Next →</button>
+        </div>
+      </div>
+      <div class="study-progress"><i id="studyBar" style="width:0%"></i></div>
+      <div class="hint" style="margin-top:12px">← → move between cards · space or enter reveals the meaning · L reads it aloud</div>
+    </div>
+
+    <div id="studyList" hidden></div>
+
+    <div class="launch-row">
+      <button class="btn primary" id="btnStudyPlay">Fly this section</button>
+    </div>
+  </section>
+
+  <!-- ============ LIBRARY ============ -->
+  <section class="screen" id="scLibrary">
+    <div class="lib-head">
+      <div>
+        <div class="eyebrow">Sentence library</div>
+        <h1 style="font-size:clamp(1.6rem,4vw,2.2rem)">Question bank</h1>
+      </div>
+      <div style="flex:1"></div>
+      <button class="btn" id="btnLibStudy">Study these</button>
+      <button class="btn ghost" id="btnLibBack">Back to base</button>
+    </div>
+    <p class="lede" id="libSource" style="margin-top:0"></p>
+
+    <div class="lib-grid">
+      <div class="card">
+        <h3>Add a sentence</h3>
+        <input type="text" id="fZh" placeholder="Chinese sentence — 我每天早上七点起床。">
+        <input type="text" id="fPy" placeholder="Pinyin — wǒ měi tiān zǎo shang qī diǎn qǐ chuáng">
+        <input type="text" id="fEn" placeholder="Correct English meaning">
+        <textarea id="fWrong" rows="3" placeholder="Wrong meanings, one per line (leave blank to borrow from other sentences)"></textarea>
+        <input type="text" id="fTag" placeholder="Set / chapter label — e.g. Unit 4">
+        <div class="toggles" style="margin-bottom:12px">
+          <button class="toggle" id="fKind" aria-pressed="false"><span class="dot"></span>This is a single term, not a sentence</button>
+        </div>
+        <div class="launch-row">
+          <button class="btn primary" id="btnAdd">Add to bank</button>
+          <button class="btn ghost" id="btnClearForm">Clear</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Paste a batch</h3>
+        <p class="hint">One sentence per line, fields separated by <code>|</code> —<br>
+          <code>chinese | pinyin | english | wrong; wrong; wrong | set | term</code><br>
+          Everything after the English is optional. Put <code>term</code> in the last field for a single vocabulary word rather than a sentence.</p>
+        <textarea id="bulk" rows="7" class="mono" placeholder="我每天早上七点起床。| wǒ měi tiān zǎo shang qī diǎn qǐ chuáng | I get up at seven every morning. | I go to bed at seven every night.; I eat breakfast at seven every morning. | Unit 1"></textarea>
+        <div class="launch-row">
+          <button class="btn primary" id="btnImport">Import</button>
+          <button class="btn ghost" id="btnExport">Export all</button>
+          <button class="btn ghost danger" id="btnReset">Reset to History bank</button>
+        </div>
+        <div class="hint" id="importMsg" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="eyebrow" style="margin:8px 0 12px">In the bank <span class="sep">/</span> <span id="libCount">0</span></div>
+      <div class="q-list" id="qList"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ============================================================
+   Hanzi Interceptor
+   ============================================================ */
+
+/* ---------- question bank: SJKC 历史 4年级 (Year 4 History) ----------
+   Chapter 5 冰河时代 · Chapter 6 史前时代
+   Sentences and pinyin transcribed from the scanned notes; the English is the
+   book's meaning tidied where its own translation was garbled (see notes). */
+const STARTER = [
+
+  /* ===== 5.1 认识冰河时代 ===== */
+  {zh:"冰河时代是指因气温急剧下降造成地球覆盖着厚冰层的时代。", py:"bīng hé shí dài shì zhǐ yīn qì wēn jí jù xià jiàng zào chéng dì qiú fù gài zhe hòu bīng céng de shí dài",
+   en:"The Ice Age was the era when a sharp drop in temperature left the earth covered by a thick layer of ice.",
+   wrong:["The Ice Age was the era when the earth's temperature rose and all the ice melted away.","The Ice Age was the era when thick clouds covered the earth and blocked the sun.","The Ice Age was the era when humans first learned to survive the cold."], tag:"5.1 Understanding the Ice Age"},
+  {zh:"在后冰河期，地球温度的上升造成冰层融化和冰川移动，进而导致海水水位上升。", py:"zài hòu bīng hé qī, dì qiú wēn dù de shàng shēng zào chéng bīng céng róng huà hé bīng chuān yí dòng, jìn ér dǎo zhì hǎi shuǐ shuǐ wèi shàng shēng",
+   en:"In the post-glacial period, rising temperatures melted the ice and moved the glaciers, which in turn made sea levels rise.",
+   wrong:["In the post-glacial period, falling temperatures thickened the ice, which in turn made sea levels drop.","In the post-glacial period, moving glaciers carved out valleys, which in turn formed new mountains.","In the post-glacial period, melting ice made the land wider and the sea shallower."], tag:"5.1 Understanding the Ice Age"},
+  {zh:"更新世冰河期地球温度持续严寒及干冷。", py:"gēng xīn shì bīng hé qī dì qiú wēn dù chí xù yán hán jí gān lěng",
+   en:"During the Pleistocene Ice Age the earth's temperature stayed bitterly cold and dry.",
+   wrong:["During the Pleistocene Ice Age the earth's temperature stayed warm and damp.","During the Pleistocene Ice Age the earth's temperature rose and fell sharply each year.","During the Holocene Ice Age the earth's temperature stayed bitterly cold and dry."], tag:"5.1 Understanding the Ice Age"},
+  {zh:"人类开始懂得如何取火。", py:"rén lèi kāi shǐ dǒng de rú hé qǔ huǒ",
+   en:"Humans began to understand how to make fire.",
+   wrong:["Humans began to understand how to farm the land.","Humans began to understand how to build boats.","Humans forgot how to make fire during the cold."], tag:"5.1 Understanding the Ice Age"},
+  {zh:"陆地面积变宽。", py:"lù dì miàn jī biàn kuān",
+   en:"The area of land became wider.",
+   wrong:["The area of land became smaller.","The sea became wider and deeper.","The land became higher and steeper."], tag:"5.1 Understanding the Ice Age"},
+  {zh:"全新世冰河期地球温度开始上升。", py:"quán xīn shì bīng hé qī dì qiú wēn dù kāi shǐ shàng shēng",
+   en:"During the Holocene Ice Age the earth's temperature began to rise.",
+   wrong:["During the Holocene Ice Age the earth's temperature began to fall.","During the Pleistocene Ice Age the earth's temperature began to rise.","During the Holocene Ice Age the earth's temperature stayed exactly the same."], tag:"5.1 Understanding the Ice Age"},
+  {zh:"冰层开始融化。", py:"bīng céng kāi shǐ róng huà",
+   en:"The layers of ice began to melt.",
+   wrong:["The layers of ice began to thicken.","The glaciers began to move towards the sea.","The snow began to fall more heavily."], tag:"5.1 Understanding the Ice Age"},
+  {zh:"海水水位上升。", py:"hǎi shuǐ shuǐ wèi shàng shēng",
+   en:"The sea level rose.",
+   wrong:["The sea level dropped.","The sea water became colder.","The rivers dried up."], tag:"5.1 Understanding the Ice Age"},
+
+  /* ===== 5.2 后冰河期的时间线 ===== */
+  {zh:"第四纪冰河期分为更新世冰河期和全新世冰河期。", py:"dì sì jì bīng hé qī fēn wéi gēng xīn shì bīng hé qī hé quán xīn shì bīng hé qī",
+   en:"The Quaternary Ice Age is divided into the Pleistocene Ice Age and the Holocene Ice Age.",
+   wrong:["The Quaternary Ice Age is divided into the Palaeolithic Age and the Neolithic Age.","The Quaternary Ice Age is divided into three periods of equal length.","The Pleistocene Ice Age is divided into the Quaternary and the Holocene."], tag:"5.2 Post-glacial Timeline"},
+  {zh:"更新世冰河期始于250万至11700年前。", py:"gēng xīn shì bīng hé qī shǐ yú 250 wàn zhì 11700 nián qián",
+   en:"The Pleistocene Ice Age ran from 2.5 million to 11,700 years ago.",
+   wrong:["The Pleistocene Ice Age ran from 11,700 years ago until today.","The Pleistocene Ice Age ran from 250,000 to 11,700 years ago.","The Pleistocene Ice Age lasted exactly 2.5 million years and ended recently."], tag:"5.2 Post-glacial Timeline"},
+  {zh:"全新世冰河期从11700年前至今。", py:"quán xīn shì bīng hé qī cóng 11700 nián qián zhì jīn",
+   en:"The Holocene Ice Age runs from 11,700 years ago until today.",
+   wrong:["The Holocene Ice Age ran from 2.5 million to 11,700 years ago.","The Holocene Ice Age ended 11,700 years ago.","The Holocene Ice Age began 700 years ago and continues today."], tag:"5.2 Post-glacial Timeline"},
+
+  /* ===== 5.3 后冰河期的变化 ===== */
+  {zh:"水流向低洼处形成湖泊和海洋。", py:"shuǐ liú xiàng dī wā chù xíng chéng hú pō hé hǎi yáng",
+   en:"Water flowed into low-lying places and formed lakes and oceans.",
+   wrong:["Water drained away from low-lying places and left dry plains.","Water froze in low-lying places and formed new glaciers.","Water flowed down from the mountains and formed waterfalls."], tag:"5.3 Post-glacial Changes"},
+  {zh:"气候由极度寒冷转变成中适度寒冷。", py:"qì hòu yóu jí dù hán lěng zhuǎn biàn chéng zhōng shì dù hán lěng",
+   en:"The climate changed from extremely cold to moderately cold.",
+   wrong:["The climate changed from moderately cold to extremely cold.","The climate changed from extremely cold to hot and dry.","The climate stayed extremely cold throughout the period."], tag:"5.3 Post-glacial Changes"},
+  {zh:"太阳的照射和地热造成气候变化。", py:"tài yáng de zhào shè hé dì rè zào chéng qì hòu biàn huà",
+   en:"Radiation from the sun and heat from the earth caused the climate to change.",
+   wrong:["Radiation from the sun alone caused the climate to change.","Volcanic ash and thick cloud caused the climate to change.","Climate change was caused by the movement of the glaciers."], tag:"5.3 Post-glacial Changes"},
+  {zh:"温度的变化导致动物灭绝。", py:"wēn dù de biàn huà dǎo zhì dòng wù miè jué",
+   en:"Changes in temperature led to the extinction of animals.",
+   wrong:["Changes in temperature led animals to grow much larger.","Hunting by humans led to the extinction of animals.","Changes in temperature caused animals to migrate but none died out."], tag:"5.3 Post-glacial Changes"},
+  {zh:"一些动物如剑齿虎和猛犸象灭绝。", py:"yì xiē dòng wù rú jiàn chǐ hǔ hé měng mǎ xiàng miè jué",
+   en:"Some animals, such as the sabre-toothed tiger and the mammoth, became extinct.",
+   wrong:["Some animals, such as the elephant and the tiger, moved to warmer places.","Some animals, such as the sabre-toothed tiger and the mammoth, survived until today.","New animals, such as the sabre-toothed tiger and the mammoth, first appeared."], tag:"5.3 Post-glacial Changes"},
+  {zh:"人类迁移到较温暖的地方。", py:"rén lèi qiān yí dào jiào wēn nuǎn de dì fāng",
+   en:"Humans migrated to warmer places.",
+   wrong:["Humans migrated to colder places.","Humans stayed where they were and waited for the cold to pass.","Animals migrated to warmer places, but humans did not."], tag:"5.3 Post-glacial Changes"},
+  {zh:"人类寻找新的栖息地。", py:"rén lèi xún zhǎo xīn de qī xī dì",
+   en:"Humans looked for new places to settle.",
+   wrong:["Humans returned to the places they had left.","Humans built permanent towns in the same caves.","Animals looked for new places to settle."], tag:"5.3 Post-glacial Changes"},
+  {zh:"地球的表面结构发生变化", py:"dì qiú de biǎo miàn jié gòu fā shēng biàn huà",
+   en:"The physical shape of the earth's surface changed",
+   wrong:["The temperature of the earth's surface changed","The earth's surface stayed exactly as it had been","Only the climate, not the land, changed"], tag:"5.3 Post-glacial Changes"},
+  {zh:"海水的水位上升至100米。", py:"hǎi shuǐ de shuǐ wèi shàng shēng zhì 100 mǐ",
+   en:"The sea level rose to as high as 100 metres.",
+   wrong:["The sea level dropped by as much as 100 metres.","The sea level rose to as high as 10 metres.","The ice reached a thickness of 100 metres."], tag:"5.3 Post-glacial Changes"},
+  {zh:"形成淡水湖", py:"xíng chéng dàn shuǐ hú",
+   en:"Freshwater lakes were formed",
+   wrong:["Saltwater seas were formed","Freshwater lakes dried up","New rivers were formed"], tag:"5.3 Post-glacial Changes"},
+  {zh:"河流流向发生变化", py:"hé liú liú xiàng fā shēng biàn huà",
+   en:"The direction the rivers flowed in changed",
+   wrong:["The rivers stopped flowing altogether","The rivers flowed faster but in the same direction","The direction of the ocean currents changed"], tag:"5.3 Post-glacial Changes"},
+
+  /* ===== 5.4 后冰河期的变化对东南亚的影响 ===== */
+  {zh:"桑达板块的海水水位上升。", py:"sāng dá bǎn kuài de hǎi shuǐ shuǐ wèi shàng shēng",
+   en:"The sea level rose on the Sunda Shelf.",
+   wrong:["The sea level dropped on the Sunda Shelf.","The Sunda Shelf rose above the sea.","The Sunda Shelf broke away from the mainland."], tag:"5.4 Impact on Southeast Asia"},
+  {zh:"东南亚冰层融化使海水水位上升形成河流和湖泊，河水淹没沿海的低洼地带。", py:"dōng nán yà bīng céng róng huà shǐ hǎi shuǐ shuǐ wèi shàng shēng xíng chéng hé liú hé hú pō, hé shuǐ yān mò yán hǎi de dī wā dì dài",
+   en:"Melting ice in Southeast Asia raised the sea level and formed rivers and lakes, and the water submerged the low-lying land along the coast.",
+   wrong:["Melting ice in Southeast Asia lowered the sea level and dried up the rivers and lakes along the coast.","Heavy rain in Southeast Asia formed rivers and lakes that submerged the highlands.","Melting ice in Southeast Asia formed rivers and lakes, but the coast was left untouched."], tag:"5.4 Impact on Southeast Asia"},
+  {zh:"冰层的融化促使东南亚成为新的栖息地。", py:"bīng céng de róng huà cù shǐ dōng nán yà chéng wéi xīn de qī xī dì",
+   en:"The melting of the ice made Southeast Asia a new place to settle.",
+   wrong:["The melting of the ice forced people to leave Southeast Asia.","The melting of the ice made Southeast Asia too wet to live in.","The freezing of the sea made Southeast Asia a new place to settle."], tag:"5.4 Impact on Southeast Asia"},
+  {zh:"人类迁移到高地过着迁移不定的生活，最后才定居下来。", py:"rén lèi qiān yí dào gāo dì guò zhe qiān yí bú dìng de shēng huó, zuì hòu cái dìng jū xià lái",
+   en:"Humans moved to the highlands and lived a wandering life, and only later settled down.",
+   wrong:["Humans moved to the highlands and settled down at once.","Humans moved to the coast and lived a wandering life, and never settled down.","Humans settled in the lowlands first and only later moved to the highlands."], tag:"5.4 Impact on Southeast Asia"},
+  {zh:"东南亚地区也成为动物的栖息地。", py:"dōng nán yà dì qū yě chéng wéi dòng wù de qī xī dì",
+   en:"The Southeast Asian region also became a habitat for animals.",
+   wrong:["The Southeast Asian region became too cold for animals to live in.","Animals left the Southeast Asian region for the highlands.","Only humans, not animals, settled in the Southeast Asian region."], tag:"5.4 Impact on Southeast Asia"},
+
+  /* ===== 6.1 认识史前时代 ===== */
+  {zh:"史前时代是人类还没有文字的时代。", py:"shǐ qián shí dài shì rén lèi hái méi yǒu wén zì de shí dài",
+   en:"The prehistoric era was the age before humans had writing.",
+   wrong:["The prehistoric era was the age before humans knew how to make fire.","The prehistoric era was the age before humans built settlements.","The prehistoric era was the age when humans first began to write."], tag:"6.1 The Prehistoric Era"},
+  {zh:"史前时代有四个阶段，即旧石器、中石器、新石器和金属器时代。", py:"shǐ qián shí dài yǒu sì gè jiē duàn, jí jiù shí qì, zhōng shí qì, xīn shí qì hé jīn shǔ qì shí dài",
+   en:"The prehistoric era has four stages: the Palaeolithic, Mesolithic, Neolithic and Metal Ages.",
+   wrong:["The prehistoric era has three stages: the Palaeolithic, Neolithic and Metal Ages.","The prehistoric era has four stages: the Ice Age, Stone Age, Bronze Age and Iron Age.","The prehistoric era has four stages, the last of which is the Neolithic Age."], tag:"6.1 The Prehistoric Era"},
+  {zh:"旧石器时代（公元前20万年）", py:"jiù shí qì shí dài (gōng yuán qián 20 wàn nián)",
+   en:"The Palaeolithic Age — 200,000 BC",
+   wrong:["The Mesolithic Age — 14,000 BC","The Neolithic Age — 3,000 BC","The Metal Age — 700 BC"], tag:"6.1 The Prehistoric Era"},
+  {zh:"中石器时代（公元前14000年）", py:"zhōng shí qì shí dài (gōng yuán qián 14000 nián)",
+   en:"The Mesolithic Age — 14,000 BC",
+   wrong:["The Palaeolithic Age — 200,000 BC","The Neolithic Age — 3,000 BC","The Metal Age — 700 BC"], tag:"6.1 The Prehistoric Era"},
+  {zh:"新石器时代（公元前3000年）", py:"xīn shí qì shí dài (gōng yuán qián 3000 nián)",
+   en:"The Neolithic Age — 3,000 BC",
+   wrong:["The Mesolithic Age — 14,000 BC","The Palaeolithic Age — 200,000 BC","The Metal Age — 700 BC"], tag:"6.1 The Prehistoric Era"},
+  {zh:"金属器时代（公元前700年）", py:"jīn shǔ qì shí dài (gōng yuán qián 700 nián)",
+   en:"The Metal Age — 700 BC",
+   wrong:["The Neolithic Age — 3,000 BC","The Mesolithic Age — 14,000 BC","The Palaeolithic Age — 200,000 BC"], tag:"6.1 The Prehistoric Era"},
+
+  /* ===== 6.2 我国史前时代的居住遗址 ===== */
+  {zh:"玲珑爪哇山（霹雳）", py:"líng lóng zhǎo wā shān (pī lì)", en:"Bukit Jawa, Lenggong — Perak",
+   wrong:["Gua Cha — Kelantan","Gua Kechil — Pahang","Kampung Sungai Lang — Selangor"], tag:"6.2 Prehistoric Sites in Malaysia"},
+  {zh:"话望生瓜茶（吉兰丹）", py:"huà wàng shēng guā chá (jí lán dān)", en:"Gua Cha, Gua Musang — Kelantan",
+   wrong:["Bukit Jawa, Lenggong — Perak","Gua Bewah — Terengganu","Gua Niah — Sarawak"], tag:"6.2 Prehistoric Sites in Malaysia"},
+  {zh:"乌鲁登嘉楼美华洞（登嘉楼）", py:"wū lǔ dēng jiā lóu měi huá dòng (dēng jiā lóu)", en:"Gua Bewah, Hulu Terengganu — Terengganu",
+   wrong:["Gua Cha, Gua Musang — Kelantan","Gua Kechil — Pahang","Bukit Tengkorak — Sabah"], tag:"6.2 Prehistoric Sites in Malaysia"},
+  {zh:"劳勿狮子洞（彭亨）", py:"láo wù shī zi dòng (péng hēng)", en:"Gua Kechil, Raub — Pahang",
+   wrong:["Gua Bewah — Terengganu","Bukit Jawa — Perak","Gua Niah — Sarawak"], tag:"6.2 Prehistoric Sites in Malaysia"},
+  {zh:"而连突淡比灵河（彭亨）", py:"ér lián tū dàn bǐ líng hé (péng hēng)", en:"Sungai Tembeling, Jerantut — Pahang",
+   wrong:["Kampung Sungai Lang — Selangor","Gua Cha — Kelantan","Bukit Tengkorak — Sabah"], tag:"6.2 Prehistoric Sites in Malaysia"},
+  {zh:"万津甘榜双溪蓝（雪兰莪）", py:"wàn jīn gān bǎng shuāng xī lán (xuě lán é)", en:"Kampung Sungai Lang, Banting — Selangor",
+   wrong:["Sungai Tembeling — Pahang","Bukit Jawa — Perak","Gua Bewah — Terengganu"], tag:"6.2 Prehistoric Sites in Malaysia"},
+  {zh:"美里尼亚洞（砂拉越）", py:"měi lǐ ní yà dòng (shā lā yuè)", en:"Gua Niah, Miri — Sarawak",
+   wrong:["Bukit Tengkorak, Semporna — Sabah","Gua Cha — Kelantan","Gua Kechil — Pahang"], tag:"6.2 Prehistoric Sites in Malaysia"},
+  {zh:"登柯拉克山（沙巴）", py:"dēng kē lā kè shān (shā bā)", en:"Bukit Tengkorak, Semporna — Sabah",
+   wrong:["Gua Niah, Miri — Sarawak","Gua Bewah — Terengganu","Kampung Sungai Lang — Selangor"], tag:"6.2 Prehistoric Sites in Malaysia"},
+
+  /* ===== 6.3 史前时代的社会活动 ===== */
+  {zh:"旧石器时代：小规模的游牧", py:"jiù shí qì shí dài: xiǎo guī mó de yóu mù",
+   en:"Palaeolithic Age: a nomadic life in small groups",
+   wrong:["Palaeolithic Age: a settled life in large groups","Neolithic Age: a nomadic life in small groups","Palaeolithic Age: a settled life in small villages"], tag:"6.3 Prehistoric Social Life"},
+  {zh:"住在山洞", py:"zhù zài shān dòng", en:"Living in caves",
+   wrong:["Living in wooden houses","Living by the river mouth","Living in large villages"], tag:"6.3 Prehistoric Social Life"},
+  {zh:"懂得用火驱逐野兽", py:"dǒng de yòng huǒ qū zhú yě shòu", en:"Knowing how to use fire to drive away wild animals",
+   wrong:["Knowing how to use fire to cook food","Knowing how to use stone tools to hunt wild animals","Knowing how to tame wild animals and keep them"], tag:"6.3 Prehistoric Social Life"},
+  {zh:"中石器时代：住在海边、山洞或河口", py:"zhōng shí qì shí dài: zhù zài hǎi biān, shān dòng huò hé kǒu",
+   en:"Mesolithic Age: living by the sea, in caves or at river mouths",
+   wrong:["Mesolithic Age: living only in caves in the highlands","Neolithic Age: living by the sea, in caves or at river mouths","Mesolithic Age: living in settled villages in river valleys"], tag:"6.3 Prehistoric Social Life"},
+  {zh:"新石器时代：大规模的固定群居", py:"xīn shí qì shí dài: dà guī mó de gù dìng qún jū",
+   en:"Neolithic Age: living settled in large groups",
+   wrong:["Neolithic Age: living a nomadic life in small groups","Palaeolithic Age: living settled in large groups","Neolithic Age: living alone in scattered caves"], tag:"6.3 Prehistoric Social Life"},
+  {zh:"在河谷和海边建立定居点", py:"zài hé gǔ hé hǎi biān jiàn lì dìng jū diǎn",
+   en:"Building settlements in river valleys and by the sea",
+   wrong:["Building settlements in the highlands and in caves","Moving between river valleys without settling","Building settlements only along the coast"], tag:"6.3 Prehistoric Social Life"},
+  {zh:"金属器时代：有首领作为领导", py:"jīn shǔ qì shí dài: yǒu shǒu lǐng zuò wéi lǐng dǎo",
+   en:"Metal Age: having a chief as their leader",
+   wrong:["Metal Age: every family lived on its own with no leader","Neolithic Age: having a chief as their leader","Metal Age: choosing a new leader for every hunt"], tag:"6.3 Prehistoric Social Life"},
+  {zh:"奉行风俗习惯和制度化仪式。", py:"fèng xíng fēng sú xí guàn hé zhì dù huà yí shì",
+   en:"Practising customs and organised ceremonies.",
+   wrong:["Practising trade and the exchange of goods.","Abandoning old customs and ceremonies.","Practising farming and the raising of livestock."], tag:"6.3 Prehistoric Social Life"},
+
+  /* ===== 6.3 史前时代的经济活动 ===== */
+  {zh:"旧石器时代：使用石器", py:"jiù shí qì shí dài: shǐ yòng shí qì", en:"Palaeolithic Age: using stone tools",
+   wrong:["Metal Age: using tools made of metal","Neolithic Age: using finer tools with many uses","Mesolithic Age: making and using better stone tools"], tag:"6.3 Prehistoric Economic Life"},
+  {zh:"采集森林资源和捕猎动物", py:"cǎi jí sēn lín zī yuán hé bǔ liè dòng wù", en:"Gathering forest products and hunting animals",
+   wrong:["Gathering forest products, hunting animals and catching fish","Growing crops and raising animals for food","Trading forest products with other groups"], tag:"6.3 Prehistoric Economic Life"},
+  {zh:"分享食物", py:"fēn xiǎng shí wù", en:"Sharing food",
+   wrong:["Storing food for the winter","Trading food for stone tools","Cooking food over a fire"], tag:"6.3 Prehistoric Economic Life"},
+  {zh:"中石器时代：制作与使用比较好的石器", py:"zhōng shí qì shí dài: zhì zuò yǔ shǐ yòng bǐ jiào hǎo de shí qì",
+   en:"Mesolithic Age: making and using better stone tools",
+   wrong:["Palaeolithic Age: using simple stone tools","Neolithic Age: using finer tools with many uses","Metal Age: making and using tools of metal"], tag:"6.3 Prehistoric Economic Life"},
+  {zh:"采集森林资源、捕猎动物和捉鱼", py:"cǎi jí sēn lín zī yuán, bǔ liè dòng wù hé zhuō yú",
+   en:"Gathering forest products, hunting animals and catching fish",
+   wrong:["Gathering forest products and hunting animals","Growing crops, catching fish and raising livestock","Hunting animals and trading their skins"], tag:"6.3 Prehistoric Economic Life"},
+  {zh:"仍会分享食物", py:"réng huì fēn xiǎng shí wù", en:"Food sharing still went on",
+   wrong:["Food sharing came to an end","Food was now traded instead of shared","Food was stored rather than eaten"], tag:"6.3 Prehistoric Economic Life"},
+  {zh:"新石器时代：使用更细致和多功能的工具", py:"xīn shí qì shí dài: shǐ yòng gèng xì zhì hé duō gōng néng de gōng jù",
+   en:"Neolithic Age: using finer tools that had many uses",
+   wrong:["Mesolithic Age: making and using better stone tools","Palaeolithic Age: using rough stone tools","Metal Age: using tools made of metal"], tag:"6.3 Prehistoric Economic Life"},
+  {zh:"耕种、捉鱼、饲养牲畜和制作陶器", py:"gēng zhòng, zhuō yú, sì yǎng shēng chù hé zhì zuò táo qì",
+   en:"Growing crops, catching fish, raising livestock and making pottery",
+   wrong:["Gathering forest products, hunting animals and catching fish","Growing crops and trading them for metal tools","Raising livestock and moving with them from place to place"], tag:"6.3 Prehistoric Economic Life"},
+  {zh:"进行以物易物的交易及实行分工制度", py:"jìn xíng yǐ wù yì wù de jiāo yì jí shí xíng fēn gōng zhì dù",
+   en:"Carrying out barter trade and practising a division of labour",
+   wrong:["Carrying out trade using metal coins as money","Sharing all food and work equally with no trade","Carrying out barter trade only with distant villages"], tag:"6.3 Prehistoric Economic Life"},
+  {zh:"金属器时代：使用金属器", py:"jīn shǔ qì shí dài: shǐ yòng jīn shǔ qì", en:"Metal Age: using tools made of metal",
+   wrong:["Neolithic Age: using finer stone tools with many uses","Palaeolithic Age: using rough stone tools","Mesolithic Age: making and using better stone tools"], tag:"6.3 Prehistoric Economic Life"},
+  {zh:"制造业和商业成为主要活动", py:"zhì zào yè hé shāng yè chéng wéi zhǔ yào huó dòng",
+   en:"Manufacturing and trade became the main activities",
+   wrong:["Hunting and gathering became the main activities","Farming and fishing became the main activities","Making pottery became the main activity"], tag:"6.3 Prehistoric Economic Life"},
+  {zh:"以物易物制度逐渐发展", py:"yǐ wù yì wù zhì dù zhú jiàn fā zhǎn", en:"The barter system gradually developed",
+   wrong:["The barter system gradually disappeared","Money gradually replaced the barter system","The division of labour gradually disappeared"], tag:"6.3 Prehistoric Economic Life"},
+
+  /* ===== 6.4 工艺贡献 ===== */
+  {zh:"农业的改变", py:"nóng yè de gǎi biàn", en:"Changes in agriculture",
+   wrong:["Changes in communication","Changes in transport","Changes in household needs"], tag:"6.4 Technology Through Time"},
+  {zh:"通信的改变", py:"tōng xìn de gǎi biàn", en:"Changes in communication",
+   wrong:["Changes in agriculture","Changes in transport","Changes in household needs"], tag:"6.4 Technology Through Time"},
+  {zh:"交通工具的改变", py:"jiāo tōng gōng jù de gǎi biàn", en:"Changes in the means of transport",
+   wrong:["Changes in communication","Changes in agriculture","Changes in household needs"], tag:"6.4 Technology Through Time"},
+  {zh:"家庭需求的改变", py:"jiā tíng xū qiú de gǎi biàn", en:"Changes in household needs",
+   wrong:["Changes in transport","Changes in agriculture","Changes in communication"], tag:"6.4 Technology Through Time"},
+
+  /* ===== Key terms · Chapter 5 ===== */
+  {zh:"冰河时代", py:"bīng hé shí dài", en:"Ice Age", kind:"term",
+   wrong:["Prehistoric era","Post-glacial period","Quaternary period"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"后冰河期", py:"hòu bīng hé qī", en:"the post-glacial period", kind:"term",
+   wrong:["the Ice Age itself","the Pleistocene Ice Age","the prehistoric era"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"第四纪冰河期", py:"dì sì jì bīng hé qī", en:"the Quaternary Ice Age", kind:"term",
+   wrong:["the Pleistocene Ice Age","the Holocene Ice Age","the post-glacial period"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"更新世冰河期", py:"gēng xīn shì bīng hé qī", en:"the Pleistocene Ice Age", kind:"term",
+   wrong:["the Holocene Ice Age","the Quaternary Ice Age","the post-glacial period"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"全新世冰河期", py:"quán xīn shì bīng hé qī", en:"the Holocene Ice Age", kind:"term",
+   wrong:["the Pleistocene Ice Age","the Quaternary Ice Age","the Metal Age"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"冰层", py:"bīng céng", en:"layer of ice", kind:"term",
+   wrong:["glacier","sea level","freshwater lake"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"冰川", py:"bīng chuān", en:"glacier", kind:"term",
+   wrong:["layer of ice","iceberg","freshwater lake"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"融化", py:"róng huà", en:"to melt", kind:"term",
+   wrong:["to freeze","to flood","to rise"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"气温", py:"qì wēn", en:"air temperature", kind:"term",
+   wrong:["climate","weather forecast","sea level"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"气候", py:"qì hòu", en:"climate", kind:"term",
+   wrong:["air temperature","season","terrain"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"海水水位", py:"hǎi shuǐ shuǐ wèi", en:"sea level", kind:"term",
+   wrong:["sea temperature","river level","low-lying land"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"地形", py:"dì xíng", en:"terrain, the shape of the land", kind:"term",
+   wrong:["climate","habitat","sea level"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"湖泊", py:"hú pō", en:"lakes", kind:"term",
+   wrong:["oceans","rivers","low-lying land"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"淡水湖", py:"dàn shuǐ hú", en:"freshwater lake", kind:"term",
+   wrong:["saltwater sea","river mouth","glacier"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"低洼地带", py:"dī wā dì dài", en:"low-lying land", kind:"term",
+   wrong:["highland","river valley","coastline"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"灭绝", py:"miè jué", en:"extinction, to die out", kind:"term",
+   wrong:["migration, to move away","hibernation","to multiply"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"剑齿虎", py:"jiàn chǐ hǔ", en:"sabre-toothed tiger", kind:"term",
+   wrong:["mammoth","giant sloth","wild boar"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"猛犸象", py:"měng mǎ xiàng", en:"mammoth", kind:"term",
+   wrong:["sabre-toothed tiger","rhinoceros","giant sloth"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"栖息地", py:"qī xī dì", en:"habitat, a place to live", kind:"term",
+   wrong:["migration","terrain","settlement site"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"迁移", py:"qiān yí", en:"to migrate, to move away", kind:"term",
+   wrong:["to settle down","to die out","to gather together"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"桑达板块", py:"sāng dá bǎn kuài", en:"the Sunda Shelf", kind:"term",
+   wrong:["Southeast Asia","the South China Sea","the Malay Peninsula"], tag:"5 · Key Terms (Ice Age)"},
+  {zh:"东南亚", py:"dōng nán yà", en:"Southeast Asia", kind:"term",
+   wrong:["the Sunda Shelf","the South China Sea","East Asia"], tag:"5 · Key Terms (Ice Age)"},
+
+  /* ===== Key terms · Chapter 6 ===== */
+  {zh:"史前时代", py:"shǐ qián shí dài", en:"the prehistoric era", kind:"term",
+   wrong:["the Ice Age","the Metal Age","the post-glacial period"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"旧石器时代", py:"jiù shí qì shí dài", en:"the Palaeolithic Age", kind:"term",
+   wrong:["the Mesolithic Age","the Neolithic Age","the Metal Age"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"中石器时代", py:"zhōng shí qì shí dài", en:"the Mesolithic Age", kind:"term",
+   wrong:["the Palaeolithic Age","the Neolithic Age","the Metal Age"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"新石器时代", py:"xīn shí qì shí dài", en:"the Neolithic Age", kind:"term",
+   wrong:["the Mesolithic Age","the Palaeolithic Age","the Metal Age"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"金属器时代", py:"jīn shǔ qì shí dài", en:"the Metal Age", kind:"term",
+   wrong:["the Neolithic Age","the Mesolithic Age","the Palaeolithic Age"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"文字", py:"wén zì", en:"writing, script", kind:"term",
+   wrong:["language","pottery","ceremony"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"公元前", py:"gōng yuán qián", en:"BC, before the Common Era", kind:"term",
+   wrong:["AD, the Common Era","the present day","a century"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"居住遗址", py:"jū zhù yí zhǐ", en:"a settlement site", kind:"term",
+   wrong:["a burial ground","a hunting ground","a trading post"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"山洞", py:"shān dòng", en:"cave", kind:"term",
+   wrong:["river mouth","river valley","hillside"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"河口", py:"hé kǒu", en:"river mouth, estuary", kind:"term",
+   wrong:["river valley","cave","coastline"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"河谷", py:"hé gǔ", en:"river valley", kind:"term",
+   wrong:["river mouth","cave","low-lying land"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"游牧", py:"yóu mù", en:"nomadic life, moving from place to place", kind:"term",
+   wrong:["settled life in one place","living together in large groups","hunting in small groups"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"群居", py:"qún jū", en:"living together in groups", kind:"term",
+   wrong:["living alone","nomadic life","settling down for good"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"定居", py:"dìng jū", en:"to settle down in one place", kind:"term",
+   wrong:["to migrate","to live nomadically","to gather in groups"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"首领", py:"shǒu lǐng", en:"chief, leader", kind:"term",
+   wrong:["hunter","craftsman","trader"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"风俗习惯", py:"fēng sú xí guàn", en:"customs and traditions", kind:"term",
+   wrong:["ceremonies and rituals","laws and rules","trade and barter"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"仪式", py:"yí shì", en:"ceremony, ritual", kind:"term",
+   wrong:["custom, tradition","festival","meeting"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"石器", py:"shí qì", en:"stone tools", kind:"term",
+   wrong:["metal tools","pottery","weapons"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"金属器", py:"jīn shǔ qì", en:"metal tools", kind:"term",
+   wrong:["stone tools","pottery","bronze coins"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"陶器", py:"táo qì", en:"pottery", kind:"term",
+   wrong:["stone tools","metal tools","woven baskets"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"采集", py:"cǎi jí", en:"to gather, to collect", kind:"term",
+   wrong:["to hunt","to grow crops","to trade"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"捕猎", py:"bǔ liè", en:"to hunt", kind:"term",
+   wrong:["to gather, to collect","to catch fish","to raise livestock"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"耕种", py:"gēng zhòng", en:"to grow crops, farming", kind:"term",
+   wrong:["to raise livestock","to gather forest products","to catch fish"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"饲养牲畜", py:"sì yǎng shēng chù", en:"to raise livestock", kind:"term",
+   wrong:["to grow crops","to hunt wild animals","to catch fish"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"以物易物", py:"yǐ wù yì wù", en:"barter trade, exchanging goods for goods", kind:"term",
+   wrong:["buying and selling with money","division of labour","sharing food freely"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"分工制度", py:"fēn gōng zhì dù", en:"division of labour", kind:"term",
+   wrong:["barter trade","a system of leaders","organised ceremonies"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"工艺", py:"gōng yì", en:"technology, craft", kind:"term",
+   wrong:["agriculture","communication","trade"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"交通工具", py:"jiāo tōng gōng jù", en:"means of transport", kind:"term",
+   wrong:["means of communication","farming tools","household goods"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"通信", py:"tōng xìn", en:"communication", kind:"term",
+   wrong:["transport","technology","trade"], tag:"6 · Key Terms (Prehistory)"},
+  {zh:"农业", py:"nóng yè", en:"agriculture, farming", kind:"term",
+   wrong:["industry","trade","transport"], tag:"6 · Key Terms (Prehistory)"}
+];
+
+/* ---------- storage ---------- */
+const LS_Q = 'hanzi-interceptor.bank.v1';
+const LS_BEST = 'hanzi-interceptor.best.v1';
+const LS_PREF = 'hanzi-interceptor.pref.v1';
+
+function lsGet(k, fallback){
+  try{ const v = localStorage.getItem(k); return v === null ? fallback : JSON.parse(v); }
+  catch(e){ return fallback; }
+}
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+let bank = [];          // active question bank
+let usingCustom = false;
+
+function loadBank(){
+  const saved = lsGet(LS_Q, null);
+  if(Array.isArray(saved) && saved.length){ bank = saved; usingCustom = true; }
+  else { bank = STARTER.map(q => ({...q})); usingCustom = false; }
+  bank.forEach((q,i) => { if(!q.id) q.id = 'q'+i+'_'+Math.random().toString(36).slice(2,7); });
+}
+function saveBank(){ usingCustom = true; lsSet(LS_Q, bank); }
+
+/* ---------- roll of honour ---------- */
+const LS_SCORES = 'hanzi-interceptor.scores.v1';
+const LS_NAME   = 'hanzi-interceptor.pilot.v1';
+const BOARD_MAX = 12;
+
+function getScores(){
+  const s = lsGet(LS_SCORES, []);
+  return Array.isArray(s) ? s : [];
+}
+function qualifies(score){
+  if(!(score > 0)) return false;
+  const s = getScores();
+  return s.length < BOARD_MAX || score > s[s.length - 1].score;
+}
+function addScore(entry){
+  const s = getScores();
+  s.push(entry);
+  s.sort((a, b) => b.score - a.score);
+  const rank = s.indexOf(entry);
+  lsSet(LS_SCORES, s.slice(0, BOARD_MAX));
+  lsSet(LS_BEST, s[0].score);
+  return rank;
+}
+
+function renderBoard(el, limit, freshStamp){
+  const s = getScores().slice(0, limit);
+  el.innerHTML = '';
+  if(!s.length){
+    const d = document.createElement('div');
+    d.className = 'board-empty';
+    d.textContent = 'No runs recorded yet. Finish a flight to put a name up here.';
+    el.appendChild(d);
+    return;
+  }
+  s.forEach((e, i) => {
+    const row = document.createElement('div');
+    row.className = 'board-row' + (i === 0 ? ' top1' : '') + (freshStamp && e.stamp === freshStamp ? ' fresh' : '');
+    const rk = document.createElement('div'); rk.className = 'rk'; rk.textContent = (i + 1);
+    const mid = document.createElement('div');
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = e.name || 'Pilot';
+    const meta = document.createElement('span'); meta.className = 'meta';
+    meta.textContent = [e.correct + '/' + e.total + ' correct', e.tier, e.set, e.date].filter(Boolean).join(' · ');
+    mid.appendChild(nm); mid.appendChild(meta);
+    const sc = document.createElement('div'); sc.className = 'sc'; sc.textContent = (e.score || 0).toLocaleString();
+    row.appendChild(rk); row.appendChild(mid); row.appendChild(sc);
+    el.appendChild(row);
+  });
+}
+
+/* ---------- preferences ---------- */
+const pref = Object.assign({
+  tier:'pilot', pinyin:true, sound:true, music:true, autoSpeak:false,
+  rate:0.9, chapter:'*', studyMode:'cards', studyReveal:'hide'
+}, lsGet(LS_PREF, {}));
+function savePref(){ lsSet(LS_PREF, pref); }
+
+const TIERS = {
+  cadet: {options:3, speed:0.78, label:'Cadet'},
+  pilot: {options:4, speed:1.00, label:'Pilot'},
+  ace:   {options:4, speed:1.32, label:'Ace'}
+};
+
+/* ---------- audio ---------- */
+let actx = null;
+function tone(freq, freq2, dur, type, vol){
+  if(!pref.sound) return;
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if(actx.state === 'suspended') actx.resume();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, actx.currentTime);
+    if(freq2) o.frequency.exponentialRampToValueAtTime(Math.max(30,freq2), actx.currentTime + dur);
+    g.gain.setValueAtTime(vol, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime + dur + 0.02);
+  }catch(e){}
+}
+const sfx = {
+  shoot: () => tone(700, 380, 0.07, 'square', 0.05),
+  good:  () => { tone(420, 900, 0.16, 'triangle', 0.12); setTimeout(()=>tone(720,1180,0.16,'triangle',0.09), 90); },
+  bad:   () => tone(200, 70, 0.30, 'sawtooth', 0.10),
+  pickup:() => { tone(880, 1320, 0.09, 'square', 0.07); setTimeout(()=>tone(1320,1760,0.10,'square',0.05), 70); },
+  slip:  () => tone(150, 90, 0.40, 'sine', 0.11),
+  over:  () => { tone(300,120,0.5,'sawtooth',0.10); setTimeout(()=>tone(180,70,0.7,'sine',0.10),180); }
+};
+
+/* ---------- background music: a small generative ambient bed ----------
+   Built live in WebAudio rather than loaded as a file, so it adds nothing
+   to page weight and can shift with the wave. */
+const MUSIC = {
+  on: false, gain: null, timer: null, step: 0, next: 0, bpm: 88, duck: 1,
+  // A minor: i - VI - III - VII, two bars each
+  chords: [
+    {root: 220.00, notes: [440.00, 523.25, 659.25]},          // Am
+    {root: 174.61, notes: [349.23, 523.25, 698.46]},          // F
+    {root: 261.63, notes: [392.00, 523.25, 659.25]},          // C
+    {root: 196.00, notes: [392.00, 493.88, 587.33]}           // G
+  ],
+  ensure(){
+    try{
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if(actx.state === 'suspended') actx.resume();
+      if(!this.gain){
+        this.gain = actx.createGain();
+        this.gain.gain.value = 0;
+        this.gain.connect(actx.destination);
+      }
+      return true;
+    }catch(e){ return false; }
+  },
+  start(){
+    if(!pref.music || this.on) return;
+    if(!this.ensure()) return;
+    this.on = true;
+    this.step = 0;
+    this.next = actx.currentTime + 0.1;
+    this.gain.gain.cancelScheduledValues(actx.currentTime);
+    this.gain.gain.setValueAtTime(0.0001, actx.currentTime);
+    this.gain.gain.linearRampToValueAtTime(0.16, actx.currentTime + 2.2);
+    this.timer = setInterval(() => this.schedule(), 90);
+  },
+  stop(){
+    if(!this.on) return;
+    this.on = false;
+    clearInterval(this.timer); this.timer = null;
+    try{
+      this.gain.gain.cancelScheduledValues(actx.currentTime);
+      this.gain.gain.setValueAtTime(this.gain.gain.value, actx.currentTime);
+      this.gain.gain.linearRampToValueAtTime(0.0001, actx.currentTime + 0.9);
+    }catch(e){}
+  },
+  setDuck(v){
+    this.duck = v;
+    if(!this.on || !this.gain) return;
+    try{
+      this.gain.gain.cancelScheduledValues(actx.currentTime);
+      this.gain.gain.linearRampToValueAtTime(0.16 * v, actx.currentTime + 0.25);
+    }catch(e){}
+  },
+  intensity(wave){ this.bpm = Math.min(118, 88 + (wave - 1) * 4); },
+  voice(freq, at, dur, type, vol, detune){
+    const o = actx.createOscillator(), g = actx.createGain(), f = actx.createBiquadFilter();
+    o.type = type; o.frequency.value = freq;
+    if(detune) o.detune.value = detune;
+    f.type = 'lowpass'; f.frequency.value = 1500; f.Q.value = 0.6;
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(vol, at + dur * 0.18);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    o.connect(f); f.connect(g); g.connect(this.gain);
+    o.start(at); o.stop(at + dur + 0.05);
+  },
+  schedule(){
+    if(!this.on) return;
+    const beat = 60 / this.bpm;
+    while(this.next < actx.currentTime + 0.35){
+      const s = this.step, at = this.next;
+      const chord = this.chords[Math.floor(s / 8) % this.chords.length];
+      if(s % 8 === 0){
+        this.voice(chord.root / 2, at, beat * 3.4, 'triangle', 0.16);       // bass
+        this.voice(chord.notes[0] / 2, at, beat * 3.6, 'sawtooth', 0.028, 6);  // pad
+        this.voice(chord.notes[1] / 2, at, beat * 3.6, 'sawtooth', 0.024, -7);
+      }
+      if(s % 2 === 0){
+        const n = chord.notes[(s / 2) % chord.notes.length];
+        this.voice(n, at, beat * 0.85, 'triangle', 0.045);                  // arpeggio
+      }
+      if(s % 8 === 6){
+        this.voice(chord.notes[2] * 2, at, beat * 0.6, 'sine', 0.022);      // sparkle
+      }
+      this.next += beat / 2;
+      this.step++;
+    }
+  }
+};
+
+/* ---------- speech: reading the Chinese sentence aloud ---------- */
+const TTS = {
+  supported: typeof window !== 'undefined' && 'speechSynthesis' in window,
+  voice: null,
+  ready: false,
+  pick(){
+    if(!this.supported) return;
+    let vs = [];
+    try{ vs = window.speechSynthesis.getVoices() || []; }catch(e){ vs = []; }
+    const zh = vs.filter(v => /^zh/i.test(v.lang || ''));
+    this.voice =
+      zh.find(v => /zh[-_]?(CN|Hans)/i.test(v.lang)) ||
+      zh.find(v => /Chinese|Mandarin|普通话|中文/i.test(v.name || '')) ||
+      zh[0] || null;
+    this.ready = !!this.voice;
+    refreshVoiceUI();
+  },
+  init(){
+    if(!this.supported) return;
+    this.pick();
+    try{ window.speechSynthesis.addEventListener('voiceschanged', () => this.pick()); }catch(e){}
+    // some engines populate the voice list a beat late
+    setTimeout(() => this.pick(), 400);
+    setTimeout(() => this.pick(), 1600);
+  },
+  say(text, btn){
+    if(!this.supported || !text) return;
+    try{
+      window.speechSynthesis.cancel();
+      setTimeout(() => {
+        const u = new SpeechSynthesisUtterance(text);
+        if(this.voice) u.voice = this.voice;
+        u.lang = (this.voice && this.voice.lang) || 'zh-CN';
+        u.rate = pref.rate || 0.9;
+        u.pitch = 1;
+        MUSIC.setDuck(0.35);
+        const done = () => { if(btn) btn.classList.remove('talking'); MUSIC.setDuck(1); };
+        if(btn) btn.classList.add('talking');
+        u.onend = done; u.onerror = done;
+        setTimeout(done, 16000);
+        window.speechSynthesis.speak(u);
+      }, 60);
+    }catch(e){}
+  },
+  stop(){ if(this.supported){ try{ window.speechSynthesis.cancel(); }catch(e){} } MUSIC.setDuck(1); }
+};
+
+function refreshVoiceUI(){
+  const btn = document.getElementById('btnSpeak');
+  const tgl = document.getElementById('tglSpeak');
+  const note = document.getElementById('voiceNote');
+  const ok = TTS.ready;
+  if(btn){
+    btn.disabled = !ok;
+    btn.title = ok ? 'Read the sentence aloud (L)' : 'No Chinese voice is installed on this device';
+  }
+  if(tgl){
+    tgl.disabled = !ok;
+    tgl.style.opacity = ok ? '' : '.4';
+    if(!ok){ pref.autoSpeak = false; tgl.setAttribute('aria-pressed','false'); }
+  }
+  const rw = document.getElementById('rateWrap');
+  if(rw) rw.style.display = ok ? '' : 'none';
+  const ssb = document.getElementById('btnStudySpeak');
+  if(ssb) ssb.disabled = !ok;
+  if(note){
+    note.textContent = ok
+      ? 'Voice: ' + (TTS.voice.name || TTS.voice.lang) + ' — tap the speaker in the game, or press L, to hear the sentence.'
+      : 'No Chinese voice found on this device, so reading aloud is off. Chinese voices come built in on iPhone, iPad and Mac; on Windows they can be added under Settings → Time & language → Language.';
+  }
+}
+
+/* ---------- dom ---------- */
+const $ = id => document.getElementById(id);
+const screens = {start:$('scStart'), game:$('scGame'), debrief:$('scDebrief'), library:$('scLibrary'), study:$('scStudy')};
+function show(name){
+  Object.values(screens).forEach(s => s.classList.remove('on'));
+  screens[name].classList.add('on');
+  window.scrollTo(0,0);
+}
+
+const field = $('field'), fx = $('fx'), ctx = fx.getContext('2d');
+const overlay = $('overlay'), ovBig = $('ovBig'), ovSub = $('ovSub'), ovReveal = $('ovReveal'), ovBtns = $('ovBtns');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ============================================================
+   Game state
+   ============================================================ */
+const G = {
+  order: [], idx: -1, lives: 3, score: 0, streak: 0, bestStreak: 0,
+  wave: 1, correct: 0, answered: 0, misses: [],
+  targets: [], bullets: [], particles: [], stars: [], pods: [], floaters: [],
+  ship: {x: 0, w: 44, aimX: null, dir: 0},
+  running: false, paused: false, phase: 'idle', lastFire: 0,
+  W: 0, H: 0, dpr: 1, qStart: 0, tierCfg: TIERS.pilot,
+  cannon: 1, slowUntil: 0, podsTaken: 0, sinceLastPod: 0
+};
+
+/* ---------- power-up pods ---------- */
+const PODS = {
+  cannon: {glyph:'C', color:'#3FD9AE', label:'CANNON UP'},
+  shield: {glyph:'+', color:'#E3B45E', label:'SHIELD +1'},
+  slow:   {glyph:'T', color:'#6FB3E0', label:'SLOW-MO'},
+  scan:   {glyph:'X', color:'#B98CE0', label:'SCAN'},
+  bonus:  {glyph:'★', color:'#FF9F4A', label:'+300'}
+};
+const CANNON = [
+  null,
+  {cooldown:165, speed:960,  offsets:[0]},
+  {cooldown:128, speed:1090, offsets:[-9, 9]},
+  {cooldown:100, speed:1220, offsets:[-15, 0, 15]}
+];
+
+function rollPod(){
+  const opts = [];
+  if(G.cannon < 3) opts.push('cannon','cannon');
+  if(G.lives < 3) opts.push('shield','shield');
+  const liveWrong = G.targets.filter(t => !t.dead && !t.correct).length;
+  if(liveWrong > 1) opts.push('scan');
+  opts.push('slow', 'bonus');
+  if(G.cannon >= 3) opts.push('bonus');
+  return opts[Math.floor(Math.random()*opts.length)];
+}
+
+function dropPod(x, y){
+  const type = rollPod();
+  G.pods.push({x, y, vy: 132, type, spin: 0, r: 15});
+  G.sinceLastPod = 0;
+}
+
+function collectPod(p){
+  const def = PODS[p.type];
+  let label = def.label;
+  sfx.pickup();
+  G.podsTaken++;
+  if(p.type === 'cannon'){
+    if(G.cannon < 3){ G.cannon++; label = 'CANNON L' + G.cannon; }
+    else { G.score += 300; label = '+300'; }
+  }else if(p.type === 'shield'){
+    if(G.lives < 3){ G.lives++; }
+    else { G.score += 300; label = '+300'; }
+  }else if(p.type === 'slow'){
+    G.slowUntil = performance.now() + 8000;
+  }else if(p.type === 'scan'){
+    const wrongs = G.targets.filter(t => !t.dead && !t.correct);
+    if(wrongs.length){
+      const victim = wrongs[Math.floor(Math.random()*wrongs.length)];
+      victim.dead = true;
+      victim.el.classList.add('fade');
+      burst(victim.x + victim.w/2, victim.y + victim.h/2, def.color, 16);
+    }else{
+      G.score += 300; label = '+300';
+    }
+  }else if(p.type === 'bonus'){
+    G.score += 300;
+  }
+  floater(p.x, p.y, label, def.color);
+  burst(p.x, p.y, def.color, 14);
+  drawHud();
+}
+
+function floater(x, y, text, color){
+  G.floaters.push({x, y, text, color, life: 1.1, max: 1.1});
+}
+
+function shuffle(a){
+  const r = a.slice();
+  for(let i=r.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [r[i],r[j]]=[r[j],r[i]]; }
+  return r;
+}
+
+function poolFor(chapter){
+  return chapter === '*' ? bank.slice() : bank.filter(q => (q.tag||'Unsorted') === chapter);
+}
+
+/* ---------- canvas sizing ---------- */
+function sizeCanvas(){
+  const r = field.getBoundingClientRect();
+  G.W = r.width; G.H = r.height;
+  G.dpr = Math.min(window.devicePixelRatio || 1, 2);
+  fx.width = Math.round(G.W * G.dpr);
+  fx.height = Math.round(G.H * G.dpr);
+  ctx.setTransform(G.dpr, 0, 0, G.dpr, 0, 0);
+  if(!G.stars.length) seedStars();
+}
+function seedStars(){
+  G.stars = [];
+  const n = reduceMotion ? 24 : 84;
+  for(let i=0;i<n;i++){
+    G.stars.push({x: Math.random(), y: Math.random(), s: Math.random()*1.5+0.3, v: Math.random()*16+4});
+  }
+}
+window.addEventListener('resize', () => { if(G.running) sizeCanvas(); });
+
+/* ============================================================
+   Round flow
+   ============================================================ */
+function startRun(list){
+  const pool = list || poolFor(pref.chapter);
+  if(!pool.length){
+    $('startStats').innerHTML = '<b style="color:var(--ember)">That set is empty</b> — pick another set, or add sentences in the library.';
+    return;
+  }
+  G.order = shuffle(pool).slice(0, 20);
+  G.idx = -1; G.lives = 3; G.score = 0; G.streak = 0; G.bestStreak = 0;
+  G.wave = 1; G.correct = 0; G.answered = 0; G.misses = [];
+  G.targets.forEach(t => t.el.remove()); G.targets = [];
+  G.bullets = []; G.particles = []; G.pods = []; G.floaters = [];
+  G.cannon = 1; G.slowUntil = 0; G.podsTaken = 0; G.sinceLastPod = 0;
+  G.running = true; G.paused = false;
+  G.tierCfg = TIERS[pref.tier] || TIERS.pilot;
+  show('game');
+  sizeCanvas();
+  G.ship.x = G.W/2; G.ship.aimX = null;
+  hideOverlay();
+  MUSIC.intensity(1); MUSIC.start();
+  drawHud();
+  nextQuestion();
+  if(!loopRunning) startLoop();
+}
+
+function nextQuestion(){
+  G.idx++;
+  if(G.idx >= G.order.length){ endRun('CLEARED'); return; }
+  const q = G.order[G.idx];
+  const cfg = G.tierCfg;
+
+  const isTerm = q.kind === 'term';
+  $('bandTag').innerHTML = '';
+  $('bandTag').appendChild(document.createTextNode((q.tag || 'Unsorted').toUpperCase()));
+  if(isTerm){
+    const f = document.createElement('span');
+    f.className = 'term-flag'; f.textContent = 'Term';
+    $('bandTag').appendChild(f);
+  }
+  $('qHanzi').classList.toggle('term', isTerm);
+  $('qHanzi').textContent = q.zh;
+  const showPy = pref.pinyin && pref.tier !== 'ace';
+  $('qPinyin').textContent = showPy ? (q.py || '') : '';
+  $('qPinyin').style.visibility = showPy ? 'visible' : 'hidden';
+  $('hudProgK').textContent = isTerm ? 'Term' : 'Sentence';
+  $('hudProg').textContent = (G.idx+1) + '/' + G.order.length;
+  G.wave = 1 + Math.floor(G.idx / 4);
+  MUSIC.intensity(G.wave);
+  drawHud();
+
+  // build options — every option gets its own lane, so a narrow field takes fewer
+  const optCount = G.W < 520 ? Math.min(cfg.options, 3) : cfg.options;
+
+  let wrongs = (q.wrong || []).filter(Boolean).slice();
+  if(wrongs.length < optCount - 1){
+    // borrow from the same section first — a distractor from another chapter is too easy
+    const pool = bank.filter(o => o.id !== q.id && o.en && o.en !== q.en);
+    const sameTag = shuffle(pool.filter(o => (o.tag||'') === (q.tag||''))).map(o => o.en);
+    const anyTag = shuffle(pool.filter(o => (o.tag||'') !== (q.tag||''))).map(o => o.en);
+    const others = sameTag.concat(anyTag);
+    for(const o of others){
+      if(wrongs.length >= optCount - 1) break;
+      if(!wrongs.includes(o)) wrongs.push(o);
+    }
+  }
+  wrongs = shuffle(wrongs).slice(0, optCount - 1);
+  const opts = shuffle(wrongs.map(t => ({text:t, correct:false})).concat([{text:q.en, correct:true}]));
+
+  spawnTargets(opts);
+  G.phase = 'live';
+  G.qStart = performance.now();
+  if(pref.autoSpeak && TTS.ready) TTS.say(q.zh, $('btnSpeak'));
+}
+
+function spawnTargets(opts){
+  G.targets.forEach(t => t.el.remove());
+  G.targets = [];
+
+  // One lane per option: nothing ever falls behind anything else, so the
+  // correct meaning always has a clear shot up from the ship.
+  const gap = 14;
+  const lanes = opts.length;
+  const laneW = (G.W - gap*(lanes+1)) / lanes;
+  const tw = Math.max(60, laneW);
+  const fs = tw < 108 ? '.7rem' : tw < 150 ? '.78rem' : tw < 200 ? '.84rem' : '.88rem';
+  const pad = tw < 108 ? '9px 8px' : '12px 13px';
+
+  const els = opts.map(o => {
+    const el = document.createElement('div');
+    el.className = 'target';
+    el.style.width = tw + 'px';
+    el.style.fontSize = fs;
+    el.style.padding = pad;
+    el.textContent = o.text;
+    field.appendChild(el);
+    return el;
+  });
+
+  const heights = els.map(el => el.offsetHeight);
+  const tallest = Math.max.apply(null, heights);
+  const dur = Math.max(6.2, 15 - (G.wave - 1) * 1.5) / G.tierCfg.speed;
+
+  opts.forEach((o, i) => {
+    const x = gap + i*(laneW + gap) + (laneW - tw)/2;
+    const y = -heights[i] - Math.random()*95;
+    const t = {
+      el: els[i], text: o.text, correct: o.correct,
+      x, y, w: tw, h: heights[i],
+      vy: (G.H + tallest + 130) / dur,
+      sway: reduceMotion ? 0 : 3,
+      phase: Math.random()*Math.PI*2,
+      x0: x, dead: false
+    };
+    place(t);
+    G.targets.push(t);
+  });
+}
+
+function place(t){
+  const tf = 'translate3d(' + Math.round(t.x) + 'px,' + Math.round(t.y) + 'px,0)';
+  t.el.style.setProperty('--tf', tf);
+  t.el.style.transform = tf;
+}
+
+/* ---------- outcomes ---------- */
+function hitCorrect(t){
+  const elapsed = (performance.now() - G.qStart) / 1000;
+  const speedBonus = Math.max(0, Math.round(90 - elapsed * 7));
+  G.streak++;
+  G.bestStreak = Math.max(G.bestStreak, G.streak);
+  const mult = Math.min(5, 1 + Math.floor(G.streak / 3));
+  G.score += (100 + speedBonus) * mult;
+  G.correct++; G.answered++;
+  sfx.good();
+  burst(t.x + t.w/2, t.y + t.h/2, '#3FD9AE', 26);
+  // a pod drops from the wreck — guaranteed every third correct answer in a row
+  G.sinceLastPod++;
+  if(G.streak % 3 === 0 || G.sinceLastPod >= 3 || Math.random() < 0.5){
+    dropPod(t.x + t.w/2, t.y + t.h/2);
+  }
+  t.el.classList.add('hit-ok'); t.dead = true;
+  G.targets.forEach(o => { if(o !== t && !o.dead){ o.dead = true; o.el.classList.add('fade'); } });
+  drawHud();
+  G.phase = 'between';
+  setTimeout(() => { clearTargets(); if(G.running) nextQuestion(); }, 620);
+}
+
+function hitWrong(t){
+  G.streak = 0;
+  G.lives--;
+  if(G.cannon > 1){ G.cannon--; floater(G.ship.x, G.H - 70, 'CANNON L' + G.cannon, '#FF6A45'); }
+  sfx.bad();
+  burst(t.x + t.w/2, t.y + t.h/2, '#FF6A45', 22);
+  t.el.classList.add('hit-bad'); t.dead = true;
+  flashDamage();
+  drawHud();
+  if(G.lives <= 0){
+    const q = G.order[G.idx];
+    G.answered++;
+    G.misses.push({q, picked: t.text});
+    G.phase = 'between';
+    setTimeout(() => endRun('SHIELDS DOWN'), 700);
+  }
+}
+
+function slipPast(t){
+  // the correct answer got away
+  G.streak = 0;
+  G.lives--;
+  G.answered++;
+  G.misses.push({q: G.order[G.idx], picked: null});
+  sfx.slip();
+  flashDamage();
+  drawHud();
+  G.phase = 'between';
+  if(G.lives <= 0){ setTimeout(() => endRun('SHIELDS DOWN'), 700); return; }
+  showReveal(G.order[G.idx]);
+}
+
+function showReveal(q){
+  ovBig.textContent = 'It slipped past';
+  ovSub.textContent = 'The right meaning was:';
+  ovReveal.textContent = q.en;
+  ovReveal.hidden = false;
+  ovBtns.innerHTML = '';
+  overlay.classList.add('on');
+  setTimeout(() => {
+    hideOverlay(); clearTargets();
+    if(G.running) nextQuestion();
+  }, 2400);
+}
+
+function clearTargets(){
+  G.targets.forEach(t => t.el.remove());
+  G.targets = [];
+}
+function hideOverlay(){ overlay.classList.remove('on'); ovReveal.hidden = true; ovBtns.innerHTML = ''; }
+
+function flashDamage(){
+  const f = $('flash');
+  f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
+  if(!reduceMotion){
+    field.classList.remove('shake'); void field.offsetWidth; field.classList.add('shake');
+  }
+}
+
+function endRun(reason){
+  G.running = false;
+  clearTargets();
+  hideOverlay();
+  TTS.stop();
+  MUSIC.stop();
+  sfx.over();
+  const best = Math.max(lsGet(LS_BEST, 0), G.score);
+  lsSet(LS_BEST, best);
+
+  $('dbTitle').textContent = reason === 'CLEARED' ? 'Debrief / set cleared' : 'Debrief / shields down';
+  $('dbScore').textContent = G.score.toLocaleString();
+  $('dbCorrect').textContent = G.correct + '/' + Math.max(G.answered, G.correct);
+  const acc = G.answered ? Math.round(G.correct / G.answered * 100) : 0;
+  $('dbAcc').textContent = acc + '%';
+  $('dbStreak').textContent = G.bestStreak;
+  $('dbBest').textContent = best.toLocaleString();
+
+  // roll of honour
+  pendingScore = {
+    stamp: Date.now(),
+    name: '',
+    score: G.score,
+    correct: G.correct,
+    total: Math.max(G.answered, G.correct),
+    tier: (TIERS[pref.tier] || {}).label || '',
+    set: pref.chapter === '*' ? 'All sections' : pref.chapter,
+    date: new Date().toLocaleDateString(undefined, {day:'numeric', month:'short'})
+  };
+  const nh = $('newHigh');
+  if(qualifies(G.score)){
+    const rank = getScores().filter(e => e.score >= G.score).length + 1;
+    $('newHighTxt').textContent = rank === 1 ? 'New top score — #1' : 'You made the board — #' + rank;
+    $('newHighName').value = lsGet(LS_NAME, '') || '';
+    nh.hidden = false;
+    setTimeout(() => { try{ $('newHighName').focus(); }catch(e){} }, 120);
+  }else{
+    nh.hidden = true;
+    pendingScore = null;
+  }
+  renderBoard($('dbBoard'), BOARD_MAX, null);
+
+  if(!G.misses.length){
+    $('dbLogWrap').innerHTML = '<div class="eyebrow" style="margin-bottom:12px">Review log</div>' +
+      '<div class="card" style="text-align:center; color:var(--verd)">Nothing missed. Every sentence read correctly.</div>';
+  }else{
+    $('dbLogWrap').innerHTML = '<div class="eyebrow" style="margin-bottom:12px">Review log <span class="sep">/</span> ' +
+      G.misses.length + ' to look at again</div><div class="log" id="dbLog"></div>';
+    const log2 = $('dbLog');
+    G.misses.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'log-item';
+      const left = document.createElement('div');
+      const py = document.createElement('div'); py.className = 'log-py'; py.textContent = m.q.py || '';
+      const zh = document.createElement('div'); zh.className = 'log-han'; zh.textContent = m.q.zh;
+      left.appendChild(py); left.appendChild(zh);
+      if(TTS.ready){
+        const sp = document.createElement('button');
+        sp.className = 'speak-btn mini';
+        sp.setAttribute('aria-label', 'Read this sentence aloud');
+        sp.title = 'Read this sentence aloud';
+        sp.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.4 8.6a5 5 0 0 1 0 6.8"/><path d="M18.6 5.4a9 9 0 0 1 0 13.2"/></svg>';
+        sp.onclick = () => TTS.say(m.q.zh, sp);
+        left.appendChild(sp);
+      }
+      const right = document.createElement('div');
+      const k = document.createElement('span'); k.className = 'log-k'; k.textContent = 'Correct meaning';
+      const ok = document.createElement('div'); ok.className = 'log-ok'; ok.textContent = m.q.en;
+      right.appendChild(k); right.appendChild(ok);
+      if(m.picked){
+        const no = document.createElement('div'); no.className = 'log-no';
+        no.textContent = 'You shot: ' + m.picked;
+        right.appendChild(no);
+      }
+      div.appendChild(left); div.appendChild(right);
+      log2.appendChild(div);
+    });
+  }
+  $('btnDrill').style.display = G.misses.length ? '' : 'none';
+  $('btnStudyMisses').style.display = G.misses.length ? '' : 'none';
+  $('btnDrill').textContent = G.misses.length === 1 ? 'Drill that 1 miss' : 'Drill the ' + G.misses.length + ' misses';
+  show('debrief');
+}
+
+let pendingScore = null;
+
+function commitScore(){
+  if(!pendingScore) return;
+  const raw = ($('newHighName').value || '').trim();
+  const name = raw.slice(0, 14) || 'Pilot';
+  pendingScore.name = name;
+  lsSet(LS_NAME, name);
+  const stamp = pendingScore.stamp;
+  addScore(pendingScore);
+  pendingScore = null;
+  $('newHigh').hidden = true;
+  renderBoard($('dbBoard'), BOARD_MAX, stamp);
+  $('dbBest').textContent = lsGet(LS_BEST, 0).toLocaleString();
+  sfx.pickup();
+}
+$('btnSaveScore').addEventListener('click', commitScore);
+$('newHighName').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); commitScore(); } });
+$('btnClearBoard').addEventListener('click', () => {
+  if(!getScores().length) return;
+  if(!confirm('Clear every score on the roll of honour? This cannot be undone.')) return;
+  try{ localStorage.removeItem(LS_SCORES); localStorage.removeItem(LS_BEST); }catch(e){}
+  refreshStart();
+});
+
+/* ---------- HUD ---------- */
+function drawHud(){
+  const pips = $('hudPips');
+  pips.innerHTML = '';
+  for(let i=0;i<3;i++){
+    const p = document.createElement('span');
+    p.className = 'pip' + (i < G.lives ? '' : ' off');
+    pips.appendChild(p);
+  }
+  const cn = $('hudCannon');
+  cn.innerHTML = '';
+  for(let i=0;i<3;i++){
+    const p = document.createElement('span');
+    p.className = 'pip cannon' + (i < G.cannon ? '' : ' off');
+    cn.appendChild(p);
+  }
+  $('hudScore').textContent = G.score.toLocaleString();
+  $('hudStreak').textContent = '×' + Math.min(5, 1 + Math.floor(G.streak/3));
+  $('hudWave').textContent = G.wave;
+}
+
+/* ============================================================
+   Loop
+   ============================================================ */
+let loopRunning = false, lastT = 0;
+
+function startLoop(){ loopRunning = true; lastT = performance.now(); requestAnimationFrame(loop); }
+
+function loop(now){
+  if(!loopRunning) return;
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if(G.running && !G.paused) update(dt);
+  render(now);
+  requestAnimationFrame(loop);
+}
+
+function update(dt){
+  // ship
+  const s = G.ship;
+  if(s.dir !== 0){
+    s.x += s.dir * 640 * dt;
+    s.aimX = null;
+  }else if(s.aimX !== null){
+    const k = 1 - Math.pow(0.0009, dt);
+    s.x += (s.aimX - s.x) * k;
+  }
+  s.x = Math.max(24, Math.min(G.W - 24, s.x));
+
+  // bullets
+  for(const b of G.bullets){ b.y += b.vy * dt; }
+  G.bullets = G.bullets.filter(b => b.y > -20);
+
+  // targets
+  const slowed = performance.now() < G.slowUntil;
+  const drift = slowed ? 0.45 : 1;
+  if(G.phase === 'live'){
+    for(const t of G.targets){
+      if(t.dead) continue;
+      t.y += t.vy * drift * dt;
+      t.phase += dt * 1.4;
+      t.x = t.x0 + Math.sin(t.phase) * t.sway;
+      place(t);
+    }
+  }
+
+  // pods
+  const sx = G.ship.x, sy = G.H - 34;
+  for(const p of G.pods){
+    p.y += p.vy * dt;
+    p.spin += dt * 2.2;
+    if(!p.taken && Math.abs(p.x - sx) < p.r + 20 && Math.abs(p.y - sy) < p.r + 18){
+      p.taken = true;
+      collectPod(p);
+    }
+  }
+  G.pods = G.pods.filter(p => !p.taken && p.y < G.H + 40);
+
+  // floating labels
+  for(const f of G.floaters){ f.y -= 34 * dt; f.life -= dt; }
+  G.floaters = G.floaters.filter(f => f.life > 0);
+
+  // collisions
+  if(G.phase === 'live'){
+    outer:
+    for(let i = G.bullets.length - 1; i >= 0; i--){
+      const b = G.bullets[i];
+      for(const t of G.targets){
+        if(t.dead) continue;
+        if(b.x >= t.x && b.x <= t.x + t.w && b.y <= t.y + t.h && b.y >= t.y){
+          G.bullets.splice(i,1);
+          if(t.correct){ hitCorrect(t); }
+          else{ hitWrong(t); }
+          break outer;
+        }
+      }
+    }
+  }
+
+  // off the bottom
+  if(G.phase === 'live'){
+    for(const t of G.targets){
+      if(t.dead) continue;
+      if(t.y > G.H){
+        t.dead = true;
+        t.el.classList.add('fade');
+        if(t.correct){ slipPast(t); break; }
+      }
+    }
+  }
+
+  // particles
+  for(const p of G.particles){
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    p.vy += 240 * dt;
+    p.life -= dt;
+  }
+  G.particles = G.particles.filter(p => p.life > 0);
+
+  // stars
+  for(const st of G.stars){
+    st.y += (st.v * dt) / Math.max(G.H,1);
+    if(st.y > 1) { st.y = 0; st.x = Math.random(); }
+  }
+}
+
+function burst(x, y, color, n){
+  if(reduceMotion) n = Math.min(n, 8);
+  for(let i=0;i<n;i++){
+    const a = Math.random()*Math.PI*2, sp = Math.random()*230 + 40;
+    G.particles.push({x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp - 60,
+      life: Math.random()*0.55 + 0.25, max: 0.8, color, size: Math.random()*2.4 + 1});
+  }
+}
+
+function fire(){
+  if(!G.running || G.paused || G.phase !== 'live') return;
+  const now = performance.now();
+  const cfg = CANNON[G.cannon] || CANNON[1];
+  if(now - G.lastFire < cfg.cooldown) return;
+  G.lastFire = now;
+
+  // every bolt in a volley is kept inside the lane the ship is under, so a
+  // wider cannon can never clip a neighbouring wrong answer
+  const sx = G.ship.x;
+  const lane = G.targets.find(t => !t.dead && sx >= t.x && sx <= t.x + t.w);
+  cfg.offsets.forEach(off => {
+    let bx = sx + off;
+    if(lane) bx = Math.max(lane.x + 5, Math.min(lane.x + lane.w - 5, bx));
+    G.bullets.push({x: bx, y: G.H - 58, vy: -cfg.speed});
+  });
+  sfx.shoot();
+}
+
+/* ---------- render ---------- */
+function render(now){
+  if(!G.W) return;
+  ctx.clearRect(0,0,G.W,G.H);
+
+  // stars
+  ctx.save();
+  for(const st of G.stars){
+    ctx.globalAlpha = 0.16 + st.s * 0.22;
+    ctx.fillStyle = '#8FC9C0';
+    ctx.fillRect(st.x * G.W, st.y * G.H, st.s, st.s * 2.2);
+  }
+  ctx.restore();
+
+  // ship
+  if(G.running){
+    const x = G.ship.x, y = G.H - 34;
+    ctx.save();
+    ctx.translate(x, y);
+
+    // engine plume
+    const flick = 0.6 + Math.sin(now/45)*0.25;
+    const grd = ctx.createLinearGradient(0, 6, 0, 30);
+    grd.addColorStop(0, 'rgba(63,217,174,' + (0.65*flick).toFixed(2) + ')');
+    grd.addColorStop(1, 'rgba(63,217,174,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.moveTo(-5, 6); ctx.lineTo(5, 6); ctx.lineTo(0, 6 + 22*flick); ctx.closePath();
+    ctx.fill();
+
+    // side cannon pods earned from upgrades
+    if(G.cannon >= 2){
+      ctx.fillStyle = '#12252C';
+      ctx.strokeStyle = '#3FD9AE';
+      ctx.lineWidth = 1.2;
+      [-15, 15].forEach(dx => {
+        ctx.beginPath(); ctx.rect(dx - 3, -8, 6, 13); ctx.fill(); ctx.stroke();
+      });
+    }
+    if(G.cannon >= 3){
+      ctx.fillStyle = '#E3B45E';
+      ctx.beginPath(); ctx.rect(-1.6, -27, 3.2, 8); ctx.fill();
+    }
+
+    // hull
+    ctx.beginPath();
+    ctx.moveTo(0, -20);
+    ctx.lineTo(7, -2);
+    ctx.lineTo(20, 8);
+    ctx.lineTo(9, 6);
+    ctx.lineTo(6, 11);
+    ctx.lineTo(-6, 11);
+    ctx.lineTo(-9, 6);
+    ctx.lineTo(-20, 8);
+    ctx.lineTo(-7, -2);
+    ctx.closePath();
+    ctx.fillStyle = '#12252C';
+    ctx.fill();
+    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = '#3FD9AE';
+    ctx.shadowColor = 'rgba(63,217,174,.7)';
+    ctx.shadowBlur = 10;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // cockpit
+    ctx.beginPath();
+    ctx.moveTo(0,-12); ctx.lineTo(3,-3); ctx.lineTo(-3,-3); ctx.closePath();
+    ctx.fillStyle = '#E3B45E';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // bullets
+  ctx.save();
+  ctx.shadowColor = 'rgba(227,180,94,.9)';
+  ctx.shadowBlur = 8;
+  ctx.fillStyle = '#E3B45E';
+  for(const b of G.bullets) ctx.fillRect(b.x - 1.5, b.y - 12, 3, 14);
+  ctx.restore();
+
+  // pods
+  for(const p of G.pods){
+    const def = PODS[p.type] || PODS.bonus;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    const wob = Math.sin(p.spin) * 0.22;
+    ctx.rotate(wob);
+    ctx.beginPath();
+    for(let i=0;i<6;i++){
+      const a = Math.PI/6 + i * Math.PI/3;
+      const px = Math.cos(a) * p.r, py = Math.sin(a) * p.r;
+      i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(9,17,21,.92)';
+    ctx.fill();
+    ctx.lineWidth = 1.8;
+    ctx.strokeStyle = def.color;
+    ctx.shadowColor = def.color;
+    ctx.shadowBlur = 12 + Math.sin(p.spin*2) * 5;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.rotate(-wob);
+    ctx.fillStyle = def.color;
+    ctx.font = '700 14px "Chakra Petch", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(def.glyph, 0, 1);
+    ctx.restore();
+  }
+
+  // particles
+  for(const p of G.particles){
+    ctx.globalAlpha = Math.max(0, p.life / p.max);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+  }
+  ctx.globalAlpha = 1;
+
+  // floating pickup labels
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = '600 13px "Chakra Petch", system-ui, sans-serif';
+  for(const f of G.floaters){
+    ctx.globalAlpha = Math.min(1, f.life / f.max * 1.5);
+    ctx.fillStyle = f.color;
+    ctx.fillText(f.text, f.x, f.y);
+  }
+  ctx.globalAlpha = 1;
+
+  // slow-mo edge tint
+  if(performance.now() < G.slowUntil){
+    ctx.save();
+    ctx.strokeStyle = 'rgba(111,179,224,.55)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(1.5, 1.5, G.W - 3, G.H - 3);
+    ctx.restore();
+  }
+}
+
+/* ============================================================
+   Input
+   ============================================================ */
+document.addEventListener('keydown', e => {
+  if(!screens.game.classList.contains('on')) return;
+  if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A'){ G.ship.dir = -1; e.preventDefault(); }
+  else if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D'){ G.ship.dir = 1; e.preventDefault(); }
+  else if(e.key === ' ' || e.key === 'Spacebar'){ fire(); e.preventDefault(); }
+  else if(e.key === 'l' || e.key === 'L'){ speakCurrent(); }
+  else if(e.key === 'p' || e.key === 'P' || e.key === 'Escape'){ togglePause(); }
+});
+document.addEventListener('keyup', e => {
+  if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A'){ if(G.ship.dir === -1) G.ship.dir = 0; }
+  if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D'){ if(G.ship.dir === 1) G.ship.dir = 0; }
+});
+
+field.addEventListener('pointermove', e => {
+  const r = field.getBoundingClientRect();
+  G.ship.aimX = e.clientX - r.left;
+  G.ship.dir = 0;
+});
+field.addEventListener('pointerdown', e => {
+  const r = field.getBoundingClientRect();
+  G.ship.aimX = e.clientX - r.left;
+  G.ship.dir = 0;
+  if(e.pointerType !== 'mouse') G.ship.x = G.ship.aimX;
+  fire();
+});
+window.addEventListener('blur', () => { if(G.running && !G.paused) togglePause(); });
+
+function speakCurrent(){
+  if(!TTS.ready) return;
+  const q = G.order[G.idx];
+  if(q) TTS.say(q.zh, $('btnSpeak'));
+}
+$('btnSpeak').addEventListener('click', speakCurrent);
+
+function togglePause(){
+  if(!G.running) return;
+  G.paused = !G.paused;
+  MUSIC.setDuck(G.paused ? 0.28 : 1);
+  if(G.paused){
+    ovBig.textContent = 'Paused';
+    ovSub.textContent = 'Press P or Escape to resume.';
+    ovReveal.hidden = true;
+    ovBtns.innerHTML = '';
+    const b = document.createElement('button');
+    b.className = 'btn primary'; b.textContent = 'Resume';
+    b.onclick = togglePause;
+    ovBtns.appendChild(b);
+    overlay.classList.add('on');
+  }else{
+    hideOverlay();
+    lastT = performance.now();
+  }
+}
+
+/* ============================================================
+   Start screen wiring
+   ============================================================ */
+function refreshStart(){
+  // tiers
+  document.querySelectorAll('.tier').forEach(b => {
+    b.setAttribute('aria-pressed', String(b.dataset.tier === pref.tier));
+  });
+  $('tglPinyin').setAttribute('aria-pressed', String(!!pref.pinyin));
+  $('tglSound').setAttribute('aria-pressed', String(!!pref.sound));
+  $('tglSpeak').setAttribute('aria-pressed', String(!!pref.autoSpeak));
+  $('tglMusic').setAttribute('aria-pressed', String(!!pref.music));
+  document.querySelectorAll('#rateSeg button').forEach(b =>
+    b.setAttribute('aria-pressed', String(Math.abs(parseFloat(b.dataset.rate) - (pref.rate||0.9)) < 0.01)));
+  refreshVoiceUI();
+
+  // chapters
+  const tags = Array.from(new Set(bank.map(q => q.tag || 'Unsorted'))).sort();
+  const sel = $('chapterSel');
+  sel.innerHTML = '';
+  const all = document.createElement('option'); all.value = '*';
+  all.textContent = 'All sentences (' + bank.length + ')';
+  sel.appendChild(all);
+  tags.forEach(t => {
+    const o = document.createElement('option');
+    o.value = t;
+    o.textContent = t + ' (' + bank.filter(q => (q.tag||'Unsorted') === t).length + ')';
+    sel.appendChild(o);
+  });
+  if(!Array.from(sel.options).some(o => o.value === pref.chapter)) pref.chapter = '*';
+  sel.value = pref.chapter;
+
+  renderBoard($('startBoard'), 5, null);
+
+  const best = lsGet(LS_BEST, 0);
+  $('startStats').innerHTML = (usingCustom ? 'Your bank' : 'History Ch 5–6') +
+    ' <b>' + bank.length + '</b> sentences <span class="sep">·</span> personal best <b>' + best.toLocaleString() + '</b>';
+
+  const spec = bank[Math.floor(Math.random()*bank.length)];
+  if(spec){ $('specPy').textContent = spec.py || ''; $('specZh').textContent = spec.zh; }
+}
+
+document.querySelectorAll('.tier').forEach(b => {
+  b.addEventListener('click', () => { pref.tier = b.dataset.tier; savePref(); refreshStart(); });
+});
+$('tglPinyin').addEventListener('click', () => { pref.pinyin = !pref.pinyin; savePref(); refreshStart(); });
+$('tglSound').addEventListener('click', () => { pref.sound = !pref.sound; savePref(); refreshStart(); if(pref.sound) sfx.shoot(); });
+$('tglMusic').addEventListener('click', () => {
+  pref.music = !pref.music; savePref(); refreshStart();
+  if(pref.music){ MUSIC.start(); setTimeout(() => { if(!G.running) MUSIC.stop(); }, 3200); }
+  else MUSIC.stop();
+});
+document.querySelectorAll('#rateSeg button').forEach(b => {
+  b.addEventListener('click', () => {
+    pref.rate = parseFloat(b.dataset.rate); savePref(); refreshStart();
+    const s = bank[Math.floor(Math.random()*bank.length)];
+    if(s && TTS.ready) TTS.say(s.zh, null);
+  });
+});
+$('tglSpeak').addEventListener('click', () => {
+  if(!TTS.ready) return;
+  pref.autoSpeak = !pref.autoSpeak; savePref(); refreshStart();
+  if(pref.autoSpeak){
+    const s = bank[0];
+    if(s) TTS.say(s.zh, null);
+  }else{ TTS.stop(); }
+});
+$('chapterSel').addEventListener('change', e => { pref.chapter = e.target.value; savePref(); });
+
+$('btnLaunch').addEventListener('click', () => startRun(null));
+$('btnLibrary').addEventListener('click', () => { renderLibrary(); show('library'); });
+$('btnPause').addEventListener('click', togglePause);
+$('btnAbort').addEventListener('click', () => {
+  G.running = false; clearTargets(); hideOverlay(); TTS.stop(); MUSIC.stop(); refreshStart(); show('start');
+});
+$('btnAgain').addEventListener('click', () => startRun(null));
+$('btnHome').addEventListener('click', () => { refreshStart(); show('start'); });
+$('btnDrill').addEventListener('click', () => {
+  const list = G.misses.map(m => m.q);
+  if(list.length) startRun(list);
+});
+$('btnStudyMisses').addEventListener('click', () => {
+  const list = G.misses.map(m => m.q);
+  if(!list.length) return;
+  buildStudySelect();
+  S.list = list; S.idx = 0;
+  applyStudyMode();
+  show('study');
+});
+
+/* ============================================================
+   Study mode
+   ============================================================ */
+const S = { list: [], idx: 0, shown: false };
+
+function studyPool(){
+  return pref.chapter === '*' ? bank.slice() : bank.filter(q => (q.tag||'Unsorted') === pref.chapter);
+}
+
+function openStudy(){
+  buildStudySelect();
+  S.list = studyPool();
+  S.idx = 0;
+  applyStudyMode();
+  show('study');
+}
+
+function buildStudySelect(){
+  const tags = Array.from(new Set(bank.map(q => q.tag || 'Unsorted'))).sort();
+  const sel = $('studySel');
+  sel.innerHTML = '';
+  const all = document.createElement('option');
+  all.value = '*'; all.textContent = 'All sections (' + bank.length + ')';
+  sel.appendChild(all);
+  tags.forEach(t => {
+    const o = document.createElement('option');
+    o.value = t;
+    o.textContent = t + ' (' + bank.filter(q => (q.tag||'Unsorted') === t).length + ')';
+    sel.appendChild(o);
+  });
+  if(!Array.from(sel.options).some(o => o.value === pref.chapter)) pref.chapter = '*';
+  sel.value = pref.chapter;
+}
+
+function applyStudyMode(){
+  document.querySelectorAll('#studyModeSeg button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.mode === pref.studyMode)));
+  document.querySelectorAll('#studyRevealSeg button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.reveal === pref.studyReveal)));
+  const cards = pref.studyMode === 'cards';
+  $('studyCards').hidden = !cards;
+  $('studyList').hidden = cards;
+  if(cards) renderStudyCard(); else renderStudyList();
+}
+
+function renderStudyCard(){
+  const n = S.list.length;
+  if(!n){
+    $('studyCount').textContent = '0 / 0';
+    $('studyPy').textContent = '';
+    $('studyZh').textContent = 'Nothing in this section yet.';
+    $('studyEn').textContent = '';
+    $('studyBar').style.width = '0%';
+    return;
+  }
+  S.idx = Math.max(0, Math.min(n - 1, S.idx));
+  const q = S.list[S.idx];
+  $('studyCount').textContent = (S.idx + 1) + ' / ' + n + '  ·  ' + (q.tag || 'Unsorted');
+  $('studyPy').textContent = pref.pinyin ? (q.py || '') : '';
+  $('studyZh').classList.toggle('term', q.kind === 'term');
+  $('studyZh').textContent = q.zh;
+  $('studyEn').textContent = q.en;
+  S.shown = pref.studyReveal === 'show';
+  $('studyEn').classList.toggle('veiled', !S.shown);
+  $('btnStudyReveal').textContent = S.shown ? 'Hide meaning' : 'Show meaning';
+  $('studyBar').style.width = ((S.idx + 1) / n * 100).toFixed(1) + '%';
+}
+
+function toggleStudyReveal(){
+  S.shown = !S.shown;
+  $('studyEn').classList.toggle('veiled', !S.shown);
+  $('btnStudyReveal').textContent = S.shown ? 'Hide meaning' : 'Show meaning';
+}
+
+function stepStudy(d){
+  if(!S.list.length) return;
+  S.idx = (S.idx + d + S.list.length) % S.list.length;
+  renderStudyCard();
+}
+
+function renderStudyList(){
+  const wrap = $('studyList');
+  wrap.innerHTML = '';
+  if(!S.list.length){
+    wrap.innerHTML = '<div class="board-empty">Nothing in this section yet.</div>';
+    return;
+  }
+  const groups = [];
+  S.list.forEach(q => {
+    const t = q.tag || 'Unsorted';
+    let g = groups.find(x => x.tag === t);
+    if(!g){ g = {tag: t, items: []}; groups.push(g); }
+    g.items.push(q);
+  });
+  groups.forEach(g => {
+    const h = document.createElement('div');
+    h.className = 'study-sec';
+    h.textContent = g.tag;
+    wrap.appendChild(h);
+    const box = document.createElement('div');
+    box.className = 'study-list';
+    g.items.forEach(q => {
+      const row = document.createElement('div');
+      row.className = 'study-row';
+      const left = document.createElement('div');
+      if(pref.pinyin && q.py){
+        const py = document.createElement('div'); py.className = 'py'; py.textContent = q.py;
+        left.appendChild(py);
+      }
+      const zh = document.createElement('div'); zh.className = 'zh'; zh.textContent = q.zh;
+      left.appendChild(zh);
+      const en = document.createElement('div'); en.className = 'en-cell'; en.textContent = q.en;
+      row.appendChild(left); row.appendChild(en);
+      if(TTS.ready){
+        const sp = document.createElement('button');
+        sp.className = 'speak-btn mini';
+        sp.style.marginTop = '0';
+        sp.setAttribute('aria-label', 'Read this sentence aloud');
+        sp.title = 'Read this sentence aloud';
+        sp.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.4 8.6a5 5 0 0 1 0 6.8"/><path d="M18.6 5.4a9 9 0 0 1 0 13.2"/></svg>';
+        sp.onclick = () => TTS.say(q.zh, sp);
+        row.appendChild(sp);
+      }
+      box.appendChild(row);
+    });
+    wrap.appendChild(box);
+  });
+}
+
+$('btnStudy').addEventListener('click', openStudy);
+$('btnStudyBack').addEventListener('click', () => { TTS.stop(); refreshStart(); show('start'); });
+$('btnStudyPrev').addEventListener('click', () => stepStudy(-1));
+$('btnStudyNext').addEventListener('click', () => stepStudy(1));
+$('btnStudyReveal').addEventListener('click', toggleStudyReveal);
+$('btnStudySpeak').addEventListener('click', () => {
+  const q = S.list[S.idx];
+  if(q) TTS.say(q.zh, $('btnStudySpeak'));
+});
+$('btnStudyPlay').addEventListener('click', () => { TTS.stop(); startRun(null); });
+$('studySel').addEventListener('change', e => {
+  pref.chapter = e.target.value; savePref();
+  S.list = studyPool(); S.idx = 0;
+  applyStudyMode();
+});
+document.querySelectorAll('#studyModeSeg button').forEach(b => {
+  b.addEventListener('click', () => { pref.studyMode = b.dataset.mode; savePref(); applyStudyMode(); });
+});
+document.querySelectorAll('#studyRevealSeg button').forEach(b => {
+  b.addEventListener('click', () => { pref.studyReveal = b.dataset.reveal; savePref(); applyStudyMode(); });
+});
+document.addEventListener('keydown', e => {
+  if(!screens.study.classList.contains('on')) return;
+  if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  if(pref.studyMode !== 'cards') return;
+  if(e.key === 'ArrowLeft'){ stepStudy(-1); e.preventDefault(); }
+  else if(e.key === 'ArrowRight'){ stepStudy(1); e.preventDefault(); }
+  else if(e.key === ' ' || e.key === 'Enter'){ toggleStudyReveal(); e.preventDefault(); }
+  else if(e.key === 'l' || e.key === 'L'){
+    const q = S.list[S.idx];
+    if(q) TTS.say(q.zh, $('btnStudySpeak'));
+  }
+});
+
+/* ============================================================
+   Library
+   ============================================================ */
+function renderLibrary(){
+  $('libSource').innerHTML = usingCustom
+    ? 'Your own bank of <b>' + bank.length + '</b> sentences, saved in this browser. Use <b>Export all</b> to copy it out — paste it back to Claude and it can be baked into the game itself so it travels to any device.'
+    : 'Currently playing the built-in <b>Year 4 History bank</b> — ' + bank.length + ' sentences from Chapters 5 and 6. Anything you add below becomes your own bank and replaces it.';
+
+  const list = $('qList');
+  list.innerHTML = '';
+  if(!bank.length){
+    list.innerHTML = '<div class="empty">Nothing in the bank yet.</div>';
+  }
+  bank.forEach(q => {
+    const row = document.createElement('div'); row.className = 'q-row';
+    const txt = document.createElement('div'); txt.className = 'txt';
+    const zh = document.createElement('div'); zh.className = 'zh'; zh.textContent = q.zh;
+    const en = document.createElement('div'); en.className = 'en'; en.textContent = q.en;
+    txt.appendChild(zh); txt.appendChild(en);
+    if(q.tag){ const tg = document.createElement('span'); tg.className = 'tg'; tg.textContent = q.tag; txt.appendChild(tg); }
+    if(q.kind === 'term'){ const tk = document.createElement('span'); tk.className = 'tg'; tk.style.color = 'var(--brass)'; tk.style.marginLeft = '6px'; tk.textContent = 'term'; txt.appendChild(tk); }
+    const del = document.createElement('button');
+    del.className = 'btn tiny ghost danger'; del.textContent = 'Delete';
+    del.onclick = () => { bank = bank.filter(x => x.id !== q.id); saveBank(); renderLibrary(); refreshStart(); };
+    row.appendChild(txt); row.appendChild(del);
+    list.appendChild(row);
+  });
+  $('libCount').textContent = bank.length;
+}
+
+function addQuestion(q){
+  q.id = 'q_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  if(!usingCustom){ bank = bank.map(x => ({...x})); }
+  bank.push(q);
+  saveBank();
+}
+
+$('btnAdd').addEventListener('click', () => {
+  const zh = $('fZh').value.trim(), en = $('fEn').value.trim();
+  if(!zh || !en){ $('importMsg').textContent = 'A sentence needs both the Chinese and its English meaning.'; return; }
+  addQuestion({
+    zh, py: $('fPy').value.trim(), en,
+    wrong: $('fWrong').value.split('\n').map(s => s.trim()).filter(Boolean),
+    tag: $('fTag').value.trim() || 'Unsorted',
+    kind: $('fKind').getAttribute('aria-pressed') === 'true' ? 'term' : undefined
+  });
+  ['fZh','fPy','fEn','fWrong'].forEach(id => $(id).value = '');
+  $('importMsg').textContent = 'Added.';
+  renderLibrary(); refreshStart();
+});
+$('btnClearForm').addEventListener('click', () => {
+  ['fZh','fPy','fEn','fWrong','fTag'].forEach(id => $(id).value = '');
+  $('fKind').setAttribute('aria-pressed', 'false');
+});
+$('fKind').addEventListener('click', () => {
+  const on = $('fKind').getAttribute('aria-pressed') === 'true';
+  $('fKind').setAttribute('aria-pressed', String(!on));
+});
+
+$('btnImport').addEventListener('click', () => {
+  const lines = $('bulk').value.split('\n').map(l => l.trim()).filter(Boolean);
+  let n = 0, skipped = 0;
+  lines.forEach(line => {
+    const parts = line.split('|').map(s => s.trim());
+    if(parts.length < 3 || !parts[0] || !parts[2]){ skipped++; return; }
+    addQuestion({
+      zh: parts[0], py: parts[1] || '', en: parts[2],
+      wrong: (parts[3] || '').split(';').map(s => s.trim()).filter(Boolean),
+      tag: parts[4] || 'Imported',
+      kind: /^term$/i.test(parts[5] || '') ? 'term' : undefined
+    });
+    n++;
+  });
+  $('bulk').value = '';
+  $('importMsg').textContent = n + ' sentence' + (n===1?'':'s') + ' imported' + (skipped ? ' · ' + skipped + ' line(s) skipped — each needs at least chinese | pinyin | english' : '') + '.';
+  renderLibrary(); refreshStart();
+});
+
+$('btnExport').addEventListener('click', () => {
+  const text = bank.map(q =>
+    [q.zh, q.py || '', q.en, (q.wrong||[]).join('; '), q.tag || '', q.kind || ''].join(' | ')
+  ).join('\n');
+  $('bulk').value = text;
+  try{ navigator.clipboard.writeText(text); $('importMsg').textContent = 'Copied to your clipboard and shown above.'; }
+  catch(e){ $('importMsg').textContent = 'Shown above — select and copy it.'; }
+});
+
+$('btnReset').addEventListener('click', () => {
+  if(!confirm('Replace your bank with the built-in Year 4 History set? Your own sentences will be removed from this browser.')) return;
+  try{ localStorage.removeItem(LS_Q); }catch(e){}
+  loadBank();
+  $('importMsg').textContent = 'Reset to the built-in History bank.';
+  renderLibrary(); refreshStart();
+});
+
+$('btnLibBack').addEventListener('click', () => { refreshStart(); show('start'); });
+$('btnLibStudy').addEventListener('click', openStudy);
+
+/* ---------- boot ---------- */
+loadBank();
+TTS.init();
+refreshStart();
+
+// prime the audio engine on the first real gesture so the first shot isn't swallowed
+function unlockAudio(){
+  if(!pref.sound && !pref.music) return;
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if(actx.state === 'suspended') actx.resume();
+  }catch(e){}
+}
+window.addEventListener('pointerdown', unlockAudio, {once:true});
+window.addEventListener('keydown', unlockAudio, {once:true});
+</script>
