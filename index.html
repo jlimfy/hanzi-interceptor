@@ -221,6 +221,36 @@
   .speak-btn.mini{position:static; width:30px; height:30px; margin-top:10px}
   .speak-btn.mini svg{width:14px; height:14px}
 
+  .vol-row{display:flex; align-items:center; gap:13px; margin-top:12px}
+  .vol-row .vk{
+    font-family:var(--hud); font-size:.64rem; letter-spacing:.17em;
+    text-transform:uppercase; color:var(--dim); flex:none;
+  }
+  .vol-row output{
+    font-family:var(--hud); font-size:.78rem; font-weight:600; color:var(--verd);
+    font-variant-numeric:tabular-nums; min-width:3.2em; text-align:right; flex:none;
+  }
+  input[type=range]{
+    -webkit-appearance:none; appearance:none;
+    flex:1; height:22px; background:transparent; margin:0; cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:4px; border-radius:2px;
+    background:linear-gradient(90deg, var(--verd) var(--fill,55%), #22343A var(--fill,55%));
+  }
+  input[type=range]::-moz-range-track{height:4px; border-radius:2px; background:#22343A}
+  input[type=range]::-moz-range-progress{height:4px; border-radius:2px; background:var(--verd)}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:15px; height:15px; border-radius:50%; margin-top:-5.5px;
+    background:var(--verd); border:2px solid #0B1317;
+    box-shadow:0 0 10px rgba(63,217,174,.6);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:13px; height:13px; border-radius:50%;
+    background:var(--verd); border:2px solid #0B1317;
+  }
+
   .stat-line{
     font-family:var(--hud); font-size:.72rem; letter-spacing:.14em;
     text-transform:uppercase; color:var(--dim);
@@ -644,6 +674,11 @@
             <button class="toggle" id="tglSound" aria-pressed="true"><span class="dot"></span>Sound</button>
             <button class="toggle" id="tglMusic" aria-pressed="true"><span class="dot"></span>Music</button>
             <button class="toggle" id="tglSpeak" aria-pressed="false"><span class="dot"></span>Read aloud</button>
+          </div>
+          <div class="vol-row" id="volRow">
+            <span class="vk">Music volume</span>
+            <input type="range" id="musicVol" min="0" max="100" step="5" value="55" aria-label="Music volume">
+            <output id="musicVolOut">55%</output>
           </div>
           <div class="hint" id="voiceNote" style="margin:9px 0 0"></div>
         </div>
@@ -1297,7 +1332,7 @@ function renderBoard(el, limit, freshStamp){
 /* ---------- preferences ---------- */
 const pref = Object.assign({
   tier:'pilot', pinyin:true, sound:true, music:true, autoSpeak:false,
-  rate:0.9, chapter:'*', studyMode:'cards', studyReveal:'hide'
+  rate:0.9, musicVol:0.55, chapter:'*', studyMode:'cards', studyReveal:'hide'
 }, lsGet(LS_PREF, {}));
 function savePref(){ lsSet(LS_PREF, pref); }
 
@@ -1337,6 +1372,16 @@ const sfx = {
    to page weight and can shift with the wave. */
 const MUSIC = {
   on: false, gain: null, timer: null, step: 0, next: 0, bpm: 88, duck: 1,
+  MAX: 0.62,
+  vol(){ const v = (pref.musicVol == null ? 0.55 : pref.musicVol); return v * this.MAX; },
+  target(){ return Math.max(0.0001, this.vol() * this.duck); },
+  setVolume(){
+    if(!this.on || !this.gain) return;
+    try{
+      this.gain.gain.cancelScheduledValues(actx.currentTime);
+      this.gain.gain.linearRampToValueAtTime(this.target(), actx.currentTime + 0.12);
+    }catch(e){}
+  },
   // A minor: i - VI - III - VII, two bars each
   chords: [
     {root: 220.00, notes: [440.00, 523.25, 659.25]},          // Am
@@ -1362,9 +1407,10 @@ const MUSIC = {
     this.on = true;
     this.step = 0;
     this.next = actx.currentTime + 0.1;
+    this.duck = 1;
     this.gain.gain.cancelScheduledValues(actx.currentTime);
     this.gain.gain.setValueAtTime(0.0001, actx.currentTime);
-    this.gain.gain.linearRampToValueAtTime(0.16, actx.currentTime + 2.2);
+    this.gain.gain.linearRampToValueAtTime(this.target(), actx.currentTime + 1.4);
     this.timer = setInterval(() => this.schedule(), 90);
   },
   stop(){
@@ -1382,7 +1428,7 @@ const MUSIC = {
     if(!this.on || !this.gain) return;
     try{
       this.gain.gain.cancelScheduledValues(actx.currentTime);
-      this.gain.gain.linearRampToValueAtTime(0.16 * v, actx.currentTime + 0.25);
+      this.gain.gain.linearRampToValueAtTime(this.target(), actx.currentTime + 0.25);
     }catch(e){}
   },
   intensity(wave){ this.bpm = Math.min(118, 88 + (wave - 1) * 4); },
@@ -1390,7 +1436,7 @@ const MUSIC = {
     const o = actx.createOscillator(), g = actx.createGain(), f = actx.createBiquadFilter();
     o.type = type; o.frequency.value = freq;
     if(detune) o.detune.value = detune;
-    f.type = 'lowpass'; f.frequency.value = 1500; f.Q.value = 0.6;
+    f.type = 'lowpass'; f.frequency.value = 2300; f.Q.value = 0.7;
     g.gain.setValueAtTime(0.0001, at);
     g.gain.exponentialRampToValueAtTime(vol, at + dur * 0.18);
     g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
@@ -1404,16 +1450,19 @@ const MUSIC = {
       const s = this.step, at = this.next;
       const chord = this.chords[Math.floor(s / 8) % this.chords.length];
       if(s % 8 === 0){
-        this.voice(chord.root / 2, at, beat * 3.4, 'triangle', 0.16);       // bass
-        this.voice(chord.notes[0] / 2, at, beat * 3.6, 'sawtooth', 0.028, 6);  // pad
-        this.voice(chord.notes[1] / 2, at, beat * 3.6, 'sawtooth', 0.024, -7);
+        this.voice(chord.root / 2, at, beat * 3.4, 'triangle', 0.30);       // bass
+        this.voice(chord.notes[0] / 2, at, beat * 3.6, 'sawtooth', 0.075, 6);  // pad
+        this.voice(chord.notes[1] / 2, at, beat * 3.6, 'sawtooth', 0.065, -7);
+      }
+      if(s % 4 === 0){
+        this.voice(chord.root, at, beat * 1.1, 'triangle', 0.10);           // bass echo on the half bar
       }
       if(s % 2 === 0){
         const n = chord.notes[(s / 2) % chord.notes.length];
-        this.voice(n, at, beat * 0.85, 'triangle', 0.045);                  // arpeggio
+        this.voice(n, at, beat * 0.85, 'triangle', 0.10);                   // arpeggio
       }
       if(s % 8 === 6){
-        this.voice(chord.notes[2] * 2, at, beat * 0.6, 'sine', 0.022);      // sparkle
+        this.voice(chord.notes[2] * 2, at, beat * 0.6, 'sine', 0.05);       // sparkle
       }
       this.next += beat / 2;
       this.step++;
@@ -2296,6 +2345,12 @@ function refreshStart(){
   $('tglSound').setAttribute('aria-pressed', String(!!pref.sound));
   $('tglSpeak').setAttribute('aria-pressed', String(!!pref.autoSpeak));
   $('tglMusic').setAttribute('aria-pressed', String(!!pref.music));
+  const pct = Math.round((pref.musicVol == null ? 0.55 : pref.musicVol) * 100);
+  const vs = $('musicVol');
+  vs.value = pct;
+  vs.style.setProperty('--fill', pct + '%');
+  $('musicVolOut').textContent = pct + '%';
+  $('volRow').style.display = pref.music ? '' : 'none';
   document.querySelectorAll('#rateSeg button').forEach(b =>
     b.setAttribute('aria-pressed', String(Math.abs(parseFloat(b.dataset.rate) - (pref.rate||0.9)) < 0.01)));
   refreshVoiceUI();
@@ -2333,9 +2388,26 @@ $('tglPinyin').addEventListener('click', () => { pref.pinyin = !pref.pinyin; sav
 $('tglSound').addEventListener('click', () => { pref.sound = !pref.sound; savePref(); refreshStart(); if(pref.sound) sfx.shoot(); });
 $('tglMusic').addEventListener('click', () => {
   pref.music = !pref.music; savePref(); refreshStart();
-  if(pref.music){ MUSIC.start(); setTimeout(() => { if(!G.running) MUSIC.stop(); }, 3200); }
+  if(pref.music) previewMusic();
   else MUSIC.stop();
 });
+
+// let the music play while the slider is being dragged, so it can be set by ear
+let previewTimer = null;
+function previewMusic(){
+  if(!pref.music) return;
+  MUSIC.start();
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(() => { if(!G.running) MUSIC.stop(); }, 5000);
+}
+$('musicVol').addEventListener('input', e => {
+  pref.musicVol = (+e.target.value) / 100;
+  e.target.style.setProperty('--fill', e.target.value + '%');
+  $('musicVolOut').textContent = e.target.value + '%';
+  MUSIC.setVolume();
+  previewMusic();
+});
+$('musicVol').addEventListener('change', savePref);
 document.querySelectorAll('#rateSeg button').forEach(b => {
   b.addEventListener('click', () => {
     pref.rate = parseFloat(b.dataset.rate); savePref(); refreshStart();
