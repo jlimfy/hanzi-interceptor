@@ -732,13 +732,13 @@
         <div class="specimen" style="border-left-color:var(--brass)">
           <div class="cap">Rules of engagement</div>
           <ul style="margin:0; padding-left:18px; color:var(--muted); font-size:.86rem; line-height:1.75">
-            <li>Three shields. A wrong meaning shot costs one.</li>
+            <li>A run is 20 sentences. You start with four shields, and only two things cost one: shooting a wrong meaning, or letting the correct meaning fall past you.</li>
             <li>Every meaning falls in its own lane, so the right one is never hidden behind a wrong one — line up under it and fire.</li>
-            <li>Wrong meanings can be ignored entirely; let them drift off the bottom. Only letting the <em>correct</em> one fall past costs a shield.</li>
+            <li>Wrong meanings can be ignored entirely; let them drift off the bottom. There is no penalty for waiting.</li>
             <li>Answer quickly for a speed bonus; three in a row starts a multiplier, up to ×5.</li>
             <li>Every correct answer can drop an upgrade pod. Fly into it before it falls away.</li>
-            <li>Every fifth sentence, an asteroid field drifts through — nothing to read, just shoot the rocks and dodge them. Big ones break into smaller ones. A collision costs a shield.</li>
-            <li>The drift speeds up every four sentences.</li>
+            <li>Every fifth sentence, an asteroid field drifts through. Big rocks break into smaller ones, and smaller ones are worth more. Hitting a rock <em>never</em> costs a shield — it knocks your cannon down a level and eats into the clear bonus.</li>
+            <li>The drift speeds up every four sentences, from about 15 seconds a sentence down to about 7.</li>
           </ul>
         </div>
       </div>
@@ -1501,7 +1501,146 @@ const STARTER = [
   {zh:"苏丹的贴身侍卫", py:"sū dān de tiē shēn shì wèi",
    en:"Laksamana — the Sultan's personal bodyguard", tag:"8.3 Duties of Each Office"},
   {zh:"维护马六甲海域和商人的安全", py:"wéi hù mǎ liù jiǎ hǎi yù hé shāng rén de ān quán",
-   en:"Laksamana — keeps the waters of Malacca and the traders within them safe", tag:"8.3 Duties of Each Office"}
+   en:"Laksamana — keeps the waters of Malacca and the traders within them safe", tag:"8.3 Duties of Each Office"},
+
+  /* ===== Key terms · Chapter 9 ===== */
+  {zh:"创始者", py:"chuàng shǐ zhě", en:"the founder", kind:"term",
+   wrong:["the ruler","the ambassador","the adviser"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"《马来纪年》", py:"mǎ lái jì nián", en:"the Sulalatus Salatin (the Malay Annals)", kind:"term",
+   wrong:["the Suma Oriental","the Sejarah Dunia","the Hikayat Hang Tuah"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"《东方志》", py:"dōng fāng zhì", en:"the Suma Oriental", kind:"term",
+   wrong:["the Sulalatus Salatin (the Malay Annals)","the Book of Kedah","the Arab chronicles"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"苏丹依斯干达沙", py:"sū dān yī sī gàn dá shā", en:"Sultan Iskandar Shah — the other name of Parameswara", kind:"term",
+   wrong:["Sultan Muzaffar Shah","Sultan Mansur Shah","Sultan Alauddin Riayat Shah"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"巨港", py:"jù gǎng", en:"Palembang", kind:"term",
+   wrong:["Temasik","Muar","Sening Ujong"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"淡马锡", py:"dàn mǎ xī", en:"Temasik", kind:"term",
+   wrong:["Palembang","Muar","Sening Ujong"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"麻坡", py:"má pō", en:"Muar", kind:"term",
+   wrong:["Sening Ujong","Temasik","Palembang"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"斯宁乌绒", py:"sī níng wū róng", en:"Sening Ujong", kind:"term",
+   wrong:["Muar","Temasik","the Bertam River"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"泊丹河", py:"bó dān hé", en:"the Bertam River", kind:"term",
+   wrong:["the Muar River","the Musi River","the Straits of Malacca"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"暹罗", py:"xiān luó", en:"Siam", kind:"term",
+   wrong:["Majapahit","China","India"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"德马基", py:"dé mǎ jī", en:"Temagi — the Siamese representative who governed Temasik", kind:"term",
+   wrong:["Parameswara's chief follower","the ruler of Majapahit","the chief of the fishing village"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"王子", py:"wáng zǐ", en:"a prince", kind:"term",
+   wrong:["a minister","a merchant","a commander"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"随从", py:"suí cóng", en:"followers, an entourage", kind:"term",
+   wrong:["enemies","traders","villagers"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"偷袭", py:"tōu xí", en:"a surprise attack", kind:"term",
+   wrong:["a retreat","a welcome","a peace treaty"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"撤退", py:"chè tuì", en:"to withdraw, to retreat", kind:"term",
+   wrong:["to attack","to settle down","to set sail"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"渔村", py:"yú cūn", en:"a fishing village", kind:"term",
+   wrong:["a trading port","a river mouth","a royal palace"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"白鼠鹿", py:"bái shǔ lù", en:"a white mouse-deer", kind:"term",
+   wrong:["a white tiger","a hunting dog","a wild boar"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"猎狗", py:"liè gǒu", en:"a hunting dog", kind:"term",
+   wrong:["a mouse-deer","a wild boar","a horse"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"马六甲树", py:"mǎ liù jiǎ shù", en:"the Melaka tree", kind:"term",
+   wrong:["the Amalaka tree","a coconut palm","a banyan tree"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"幸运之地", py:"xìng yùn zhī dì", en:"a lucky place", kind:"term",
+   wrong:["a strategic position","a sheltered harbour","a fertile valley"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"季候风", py:"jì hòu fēng", en:"the monsoon winds", kind:"term",
+   wrong:["the trade winds","a storm at sea","the dry season"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"马六甲海峡", py:"mǎ liù jiǎ hǎi xiá", en:"the Straits of Malacca", kind:"term",
+   wrong:["the South China Sea","the Bertam River","the Sunda Shelf"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"避风港", py:"bì fēng gǎng", en:"a sheltered harbour", kind:"term",
+   wrong:["a trading port","a naval base","a river mouth"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"行政制度", py:"xíng zhèng zhì dù", en:"a system of administration", kind:"term",
+   wrong:["a legal system","a trading system","a social structure"], tag:"9 · Key Terms (Founding of Malacca)"},
+  {zh:"睿智", py:"ruì zhì", en:"wisdom, good judgement", kind:"term",
+   wrong:["persistence","bravery","loyalty"], tag:"9 · Key Terms (Founding of Malacca)"},
+
+  /* ===== 9.1 认识马六甲王朝的创始者 ===== */
+  {zh:"《马来纪年》和《东方志》记载了马六甲王朝创始者的事迹。", py:"mǎ lái jì nián hé dōng fāng zhì jì zǎi le mǎ liù jiǎ wáng cháo chuàng shǐ zhě de shì jì",
+   en:"The Sulalatus Salatin and the Suma Oriental record the deeds of the founder of the Malacca Sultanate.",
+   wrong:["The Sulalatus Salatin and the Suma Oriental were both written by the founder of the Malacca Sultanate.","Only the Suma Oriental records the deeds of the founder of the Malacca Sultanate.","The Sulalatus Salatin and the Suma Oriental disagree about who founded the Malacca Sultanate."], tag:"9.1 The Two Sources"},
+  {zh:"根据这两本书，拜里米苏拉又称苏丹依斯干达沙，他创建了马六甲王朝。", py:"gēn jù zhè liǎng běn shū, bài lǐ mǐ sū lā yòu chēng sū dān yī sī gàn dá shā, tā chuàng jiàn le mǎ liù jiǎ wáng cháo",
+   en:"According to these two books, Parameswara — also called Sultan Iskandar Shah — founded the Malacca Sultanate.",
+   wrong:["According to these two books, Sultan Iskandar Shah was the son of Parameswara.","According to these two books, Parameswara took the throne from Sultan Iskandar Shah.","According to these two books, Parameswara ruled Malacca after Sultan Iskandar Shah founded it."], tag:"9.1 The Two Sources"},
+
+  /* ===== 9.2 拜里米苏拉的背景 ===== */
+  {zh:"拜里米苏拉是马来王国巨港的王子。", py:"bài lǐ mǐ sū lā shì mǎ lái wáng guó jù gǎng de wáng zǐ",
+   en:"Parameswara was a prince of the Malay kingdom of Palembang.",
+   wrong:["Parameswara was a prince of the Malay kingdom of Temasik.","Parameswara was a merchant who came to Palembang to trade.","Parameswara was a commander in the army of Majapahit."], tag:"9.2 Parameswara's Background"},
+  {zh:"拜里米苏拉企图使巨港摆脱满者伯夷的统治，导致满者伯夷进攻巨港。", py:"bài lǐ mǐ sū lā qǐ tú shǐ jù gǎng bǎi tuō mǎn zhě bó yí de tǒng zhì, dǎo zhì mǎn zhě bó yí jìn gōng jù gǎng",
+   en:"Parameswara tried to free Palembang from Majapahit rule, and this led Majapahit to attack Palembang.",
+   wrong:["Parameswara asked Majapahit for help, and Majapahit sent an army to defend Palembang.","Majapahit attacked Palembang first, and only then did Parameswara rebel.","Parameswara freed Palembang from Majapahit rule without a fight."], tag:"9.2 Parameswara's Background"},
+  {zh:"拜里米苏拉和随从被迫离开巨港并逃往淡马锡。", py:"bài lǐ mǐ sū lā hé suí cóng bèi pò lí kāi jù gǎng bìng táo wǎng dàn mǎ xī",
+   en:"Parameswara and his followers were forced to leave Palembang and fled to Temasik.",
+   wrong:["Parameswara and his followers chose to leave Palembang to look for better trade.","Parameswara and his followers were forced to leave Temasik and fled to Palembang.","Parameswara stayed in Palembang while his followers fled to Temasik."], tag:"9.2 Parameswara's Background"},
+  {zh:"拜里米苏拉是一名英明睿智的领袖，因此得到一批忠实下属的拥护。", py:"bài lǐ mǐ sū lā shì yì míng yīng míng ruì zhì de lǐng xiù, yīn cǐ dé dào yì pī zhōng shí xià shǔ de yōng hù",
+   en:"Parameswara was a wise and able leader, and so won the support of a body of loyal followers.",
+   wrong:["Parameswara was a harsh leader, and so his followers deserted him.","Parameswara was a wise leader, but his followers still refused to obey him.","Parameswara's followers were loyal to him only because he paid them well."], tag:"9.2 Parameswara's Background"},
+
+  /* ===== 9.3 建国历程 ===== */
+  {zh:"拜里米苏拉和随从乘船去淡马锡，并遇到了当时派来管治淡马锡的暹罗代表——德马基。", py:"bài lǐ mǐ sū lā hé suí cóng chéng chuán qù dàn mǎ xī, bìng yù dào le dāng shí pài lái guǎn zhì dàn mǎ xī de xiān luó dài biǎo — dé mǎ jī",
+   en:"Parameswara and his followers sailed to Temasik and met Temagi, the representative Siam had sent to govern Temasik.",
+   wrong:["Parameswara and his followers sailed to Temasik and met Temagi, the ruler of Majapahit.","Parameswara sent his followers to Temasik to meet Temagi while he stayed behind.","Parameswara and his followers sailed to Muar and met Temagi, the Siamese representative."], tag:"9.3 The Journey to Malacca"},
+  {zh:"拜里米苏拉受到德马基的迎接。德马基允许拜里米苏拉定居在淡马锡。", py:"bài lǐ mǐ sū lā shòu dào dé mǎ jī de yíng jiē. dé mǎ jī yǔn xǔ bài lǐ mǐ sū lā dìng jū zài dàn mǎ xī",
+   en:"Temagi welcomed Parameswara and allowed him to settle in Temasik.",
+   wrong:["Temagi refused to welcome Parameswara and drove him out of Temasik.","Parameswara welcomed Temagi and allowed him to settle in Temasik.","Temagi welcomed Parameswara but made him leave after a short stay."], tag:"9.3 The Journey to Malacca"},
+  {zh:"拜里米苏拉认为淡马锡的地理位置优越，适合建立王国。", py:"bài lǐ mǐ sū lā rèn wéi dàn mǎ xī de dì lǐ wèi zhì yōu yuè, shì hé jiàn lì wáng guó",
+   en:"Parameswara thought Temasik's position was excellent and suitable for founding a kingdom.",
+   wrong:["Parameswara thought Temasik was too small and unsuitable for a kingdom.","Parameswara thought Temasik's position was excellent but its people unwilling.","Temagi told Parameswara that Temasik was suitable for founding a kingdom."], tag:"9.3 The Journey to Malacca"},
+  {zh:"为了占领淡马锡，拜里米苏拉偷袭德马基，这导致德马基被杀。", py:"wèi le zhàn lǐng dàn mǎ xī, bài lǐ mǐ sū lā tōu xí dé mǎ jī, zhè dǎo zhì dé mǎ jī bèi shā",
+   en:"To take Temasik for himself, Parameswara launched a surprise attack on Temagi, and Temagi was killed.",
+   wrong:["To take Temasik for himself, Parameswara offered Temagi gold, and Temagi left peacefully.","Temagi launched a surprise attack on Parameswara, and Parameswara was forced to flee.","Parameswara attacked Temagi to defend himself, and Temagi escaped to Siam."], tag:"9.3 The Journey to Malacca"},
+  {zh:"暹罗准备发动战争，进攻淡马锡。", py:"xiān luó zhǔn bèi fā dòng zhàn zhēng, jìn gōng dàn mǎ xī",
+   en:"Siam prepared to go to war and attack Temasik.",
+   wrong:["Majapahit prepared to go to war and attack Temasik.","Siam prepared to go to war and attack Palembang.","Siam sent envoys to make peace with Parameswara in Temasik."], tag:"9.3 The Journey to Malacca"},
+  {zh:"在得知暹罗要进攻淡马锡后，拜里米苏拉和随从撤退到麻坡。", py:"zài dé zhī xiān luó yào jìn gōng dàn mǎ xī hòu, bài lǐ mǐ sū lā hé suí cóng chè tuì dào má pō",
+   en:"On learning that Siam was going to attack Temasik, Parameswara and his followers withdrew to Muar.",
+   wrong:["On learning that Siam was going to attack Temasik, Parameswara stayed and fought.","On learning that Majapahit was going to attack, Parameswara withdrew to Muar.","On learning that Siam was going to attack, Parameswara withdrew to Sening Ujong."], tag:"9.3 The Journey to Malacca"},
+  {zh:"拜里米苏拉和随从离开麻坡，到了斯宁乌绒。", py:"bài lǐ mǐ sū lā hé suí cóng lí kāi má pō, dào le sī níng wū róng",
+   en:"Parameswara and his followers left Muar and reached Sening Ujong.",
+   wrong:["Parameswara and his followers left Sening Ujong and reached Muar.","Parameswara and his followers left Muar and returned to Temasik.","Parameswara stayed in Muar and sent his followers to Sening Ujong."], tag:"9.3 The Journey to Malacca"},
+  {zh:"拜里米苏拉委派一名代表管治斯宁乌绒。", py:"bài lǐ mǐ sū lā wěi pài yì míng dài biǎo guǎn zhì sī níng wū róng",
+   en:"Parameswara appointed a representative to govern Sening Ujong.",
+   wrong:["Parameswara appointed himself as the ruler of Sening Ujong.","Siam appointed a representative to govern Sening Ujong.","Parameswara left Sening Ujong with no one to govern it."], tag:"9.3 The Journey to Malacca"},
+
+  /* ===== 9.4 马六甲的开国事迹 ===== */
+  {zh:"拜里米苏拉和随从离开斯宁乌绒后，继续航行至泊丹河河口。拜里米苏拉看到一个渔村并决定在那里停留。", py:"bài lǐ mǐ sū lā hé suí cóng lí kāi sī níng wū róng hòu, jì xù háng xíng zhì bó dān hé hé kǒu. bài lǐ mǐ sū lā kàn dào yí gè yú cūn bìng jué dìng zài nà lǐ tíng liú",
+   en:"After leaving Sening Ujong, Parameswara sailed on to the mouth of the Bertam River, saw a fishing village and decided to stop there.",
+   wrong:["After leaving Sening Ujong, Parameswara sailed on to the mouth of the Muar River and founded a village there.","After leaving Sening Ujong, Parameswara returned to Temasik and stopped at a fishing village.","Parameswara sailed to the mouth of the Bertam River but found no one living there."], tag:"9.4 The Founding of Malacca"},
+  {zh:"拜里米苏拉和随从去打猎时，拜里米苏拉看到一只白鼠鹿将猎狗踢下河。", py:"bài lǐ mǐ sū lā hé suí cóng qù dǎ liè shí, bài lǐ mǐ sū lā kàn dào yì zhī bái shǔ lù jiāng liè gǒu tī xià hé",
+   en:"While out hunting, Parameswara saw a white mouse-deer kick his hunting dog into the river.",
+   wrong:["While out hunting, Parameswara saw his hunting dog catch a white mouse-deer by the river.","While out hunting, Parameswara saw a white mouse-deer run away from his hunting dog.","While out hunting, Parameswara's hunting dog fell into the river and was swept away."], tag:"9.4 The Founding of Malacca"},
+  {zh:"拜里米苏拉眼见一只小动物成功击败体型比它大的动物，他认为这是个幸运之地，适合建立王国。", py:"bài lǐ mǐ sū lā yǎn jiàn yì zhī xiǎo dòng wù chéng gōng jī bài tǐ xíng bǐ tā dà de dòng wù, tā rèn wéi zhè shì gè xìng yùn zhī dì, shì hé jiàn lì wáng guó",
+   en:"Seeing a small animal beat a bigger one, Parameswara decided this was a lucky place, fit for founding a kingdom.",
+   wrong:["Seeing a small animal beaten by a bigger one, Parameswara decided this was an unlucky place.","Seeing how many animals lived there, Parameswara decided this was a good place to hunt.","Parameswara's followers told him the place was lucky and fit for a kingdom."], tag:"9.4 The Founding of Malacca"},
+  {zh:"拜里米苏拉决定在此建立新王国，并以他休息时背靠着的马六甲树为新王国命名。", py:"bài lǐ mǐ sū lā jué dìng zài cǐ jiàn lì xīn wáng guó, bìng yǐ tā xiū xi shí bèi kào zhe de mǎ liù jiǎ shù wéi xīn wáng guó mìng míng",
+   en:"Parameswara decided to found his new kingdom there, and named it after the Melaka tree he had been resting against.",
+   wrong:["Parameswara decided to found his new kingdom there, and named it after the river it stood on.","Parameswara decided to found his new kingdom there, and named it after the fishing village he found.","Parameswara named the Melaka tree after his new kingdom."], tag:"9.4 The Founding of Malacca"},
+
+  /* ===== 9.5 马六甲名字的由来 ===== */
+  {zh:"马六甲这个名字源自马六甲树，那是当时拜里米苏拉看到白鼠鹿踢猎狗时，他休息背靠着的树。", py:"mǎ liù jiǎ zhè ge míng zì yuán zì mǎ liù jiǎ shù, nà shì dāng shí bài lǐ mǐ sū lā kàn dào bái shǔ lù tī liè gǒu shí, tā xiū xi bèi kào zhe de shù",
+   en:"Sulalatus Salatin — the name Melaka comes from the Melaka tree Parameswara was leaning against when he saw the mouse-deer kick his dog.",
+   wrong:["Arabic sources — the name comes from Malakat, meaning a gathering of all trades.","Indian sources — the name comes from Amalaka, the first tree to grow in the universe.","Suma Oriental — the name comes from Malaqa, meaning a place of shelter."], tag:"9.5 Where the Name Came From"},
+  {zh:"阿拉伯人的说法：马六甲名字源于Malakat，意思是市集。", py:"ā lā bó rén de shuō fǎ: mǎ liù jiǎ míng zì yuán yú Malakat, yì si shì shì jí",
+   en:"Arabic sources — the name comes from Malakat, meaning a gathering of all trades, a marketplace.",
+   wrong:["Indian sources — the name comes from Amalaka, the first tree to grow in the universe.","Suma Oriental — the name comes from Malaqa, meaning a place of shelter.","Sulalatus Salatin — the name comes from the Melaka tree Parameswara rested against."], tag:"9.5 Where the Name Came From"},
+  {zh:"印度人的说法：马六甲名字源于Amalaka，即宇宙长出的第一棵树。", py:"yìn dù rén de shuō fǎ: mǎ liù jiǎ míng zì yuán yú Amalaka, jí yǔ zhòu zhǎng chū de dì yī kē shù",
+   en:"Indian sources — the name comes from Amalaka, the first tree to grow in the universe.",
+   wrong:["Arabic sources — the name comes from Malakat, meaning a gathering of all trades.","Suma Oriental — the name comes from Malaqa, meaning a place of shelter.","Sulalatus Salatin — the name comes from the Melaka tree Parameswara rested against."], tag:"9.5 Where the Name Came From"},
+  {zh:"《东方志》：马六甲名字源于Malaqa，意思是避风港。", py:"dōng fāng zhì: mǎ liù jiǎ míng zì yuán yú Malaqa, yì si shì bì fēng gǎng",
+   en:"Suma Oriental — the name comes from Malaqa, meaning a place of shelter.",
+   wrong:["Arabic sources — the name comes from Malakat, meaning a gathering of all trades.","Indian sources — the name comes from Amalaka, the first tree to grow in the universe.","Sulalatus Salatin — the name comes from the Melaka tree Parameswara rested against."], tag:"9.5 Where the Name Came From"},
+
+  /* ===== 9.6 马六甲在拜里米苏拉时代的特点 ===== */
+  {zh:"马六甲海峡是季候风的避风港，因此船只能够安全航行。", py:"mǎ liù jiǎ hǎi xiá shì jì hòu fēng de bì fēng gǎng, yīn cǐ chuán zhī néng gòu ān quán háng xíng",
+   en:"Protected from the monsoon — the Straits of Malacca shelter ships from the monsoon winds, so they could sail safely.",
+   wrong:["Protected from the monsoon — the monsoon winds blew ships quickly through the Straits of Malacca.","Strategic location — the Straits of Malacca lie between the eastern and western sea routes.","The wisdom of its rulers — an open administration kept the Straits of Malacca safe."], tag:"9.6 Malacca Under Parameswara"},
+  {zh:"马六甲位于东西方海路之间，吸引各国商人到此做生意。", py:"mǎ liù jiǎ wèi yú dōng xī fāng hǎi lù zhī jiān, xī yǐn gè guó shāng rén dào cǐ zuò shēng yì",
+   en:"Strategic location — Malacca lies between the eastern and western sea routes, drawing traders from many countries to do business there.",
+   wrong:["Strategic location — Malacca lies far from the sea routes, so its traders were left in peace.","Protected from the monsoon — the Straits of Malacca shelter ships from the monsoon winds.","The wisdom of its rulers — an efficient administration drew traders from many countries."], tag:"9.6 Malacca Under Parameswara"},
+  {zh:"马六甲王朝实行有效率和开放的行政制度，吸引外国与马六甲建立外交关系。", py:"mǎ liù jiǎ wáng cháo shí xíng yǒu xiào lǜ hé kāi fàng de xíng zhèng zhì dù, xī yǐn wài guó yǔ mǎ liù jiǎ jiàn lì wài jiāo guān xì",
+   en:"The wisdom of its rulers — the Malacca Sultanate ran an efficient and open administration, which drew foreign states into diplomatic relations with Malacca.",
+   wrong:["The wisdom of its rulers — the Malacca Sultanate kept its administration closed to foreigners.","Strategic location — Malacca's position between the sea routes drew foreign states into diplomatic relations.","The wisdom of its rulers — the Malacca Sultanate paid foreign states to become its allies."], tag:"9.6 Malacca Under Parameswara"}
 ];
 
 /* ---------- storage ---------- */
@@ -1814,8 +1953,10 @@ const G = {
   running: false, paused: false, phase: 'idle', lastFire: 0,
   W: 0, H: 0, dpr: 1, qStart: 0, tierCfg: TIERS.pilot,
   cannon: 1, slowUntil: 0, podsTaken: 0, sinceLastPod: 0,
-  rocks: [], invuln: 0, ilUntil: 0, ilSpawn: 0, ilKills: 0, ilAfter: null
+  rocks: [], invuln: 0, ilUntil: 0, ilSpawn: 0, ilKills: 0, ilHits: 0, ilAfter: null
 };
+
+const MAX_LIVES = 4;
 
 /* ---------- asteroid interlude ---------- */
 const ROCK = [
@@ -1845,6 +1986,7 @@ function startInterlude(after){
   G.ilKills = 0;
   G.ilUntil = performance.now() + IL_LENGTH;
   G.ilSpawn = 0;
+  G.ilHits = 0;
   MUSIC.intensity(G.wave + 3);
 
   $('bandTag').textContent = 'INTERLUDE';
@@ -1862,7 +2004,7 @@ function startInterlude(after){
 }
 
 function endInterlude(){
-  const bonus = 150 + G.lives * 60 + G.ilKills * 5;
+  const bonus = Math.max(50, 150 + G.ilKills * 8 - G.ilHits * 60);
   G.score += bonus;
   floater(G.W/2, G.H * 0.45, 'FIELD CLEAR  +' + bonus, '#E3B45E');
   G.rocks = [];
@@ -1908,13 +2050,15 @@ function updateInterlude(dt, now){
     for(const k of G.rocks){
       const dx = sx - k.x, dy = sy - k.y;
       if(dx*dx + dy*dy < (k.r + 15) * (k.r + 15)){
+        // a rock never ends the run - it costs firepower and the clear bonus
         breakRock(k, true);
-        G.lives--;
+        G.ilHits++;
         G.invuln = now + 1800;
+        if(G.cannon > 1){ G.cannon--; floater(G.ship.x, G.H - 70, 'CANNON L' + G.cannon, '#FF6A45'); }
+        else { floater(G.ship.x, G.H - 70, 'HULL SCRAPED', '#FF6A45'); }
         sfx.bad();
         flashDamage();
         drawHud();
-        if(G.lives <= 0){ G.phase = 'between'; setTimeout(() => endRun('SHIELDS DOWN'), 700); return; }
         break;
       }
     }
@@ -1961,7 +2105,8 @@ const CANNON = [
 function rollPod(){
   const opts = [];
   if(G.cannon < 3) opts.push('cannon','cannon');
-  if(G.lives < 3) opts.push('shield','shield');
+  if(G.lives < MAX_LIVES) opts.push('shield','shield');
+  if(G.lives <= 1) opts.push('shield','shield','shield');   // a hand up when nearly out
   const liveWrong = G.targets.filter(t => !t.dead && !t.correct).length;
   if(liveWrong > 1) opts.push('scan');
   opts.push('slow', 'bonus');
@@ -1984,7 +2129,7 @@ function collectPod(p){
     if(G.cannon < 3){ G.cannon++; label = 'CANNON L' + G.cannon; }
     else { G.score += 300; label = '+300'; }
   }else if(p.type === 'shield'){
-    if(G.lives < 3){ G.lives++; }
+    if(G.lives < MAX_LIVES){ G.lives++; }
     else { G.score += 300; label = '+300'; }
   }else if(p.type === 'slow'){
     G.slowUntil = performance.now() + 8000;
@@ -2049,12 +2194,12 @@ function startRun(list){
     return;
   }
   G.order = shuffle(pool).slice(0, 20);
-  G.idx = -1; G.lives = 3; G.score = 0; G.streak = 0; G.bestStreak = 0;
+  G.idx = -1; G.lives = MAX_LIVES; G.score = 0; G.streak = 0; G.bestStreak = 0;
   G.wave = 1; G.correct = 0; G.answered = 0; G.misses = [];
   G.targets.forEach(t => t.el.remove()); G.targets = [];
   G.bullets = []; G.particles = []; G.pods = []; G.floaters = [];
   G.cannon = 1; G.slowUntil = 0; G.podsTaken = 0; G.sinceLastPod = 0;
-  G.rocks = []; G.invuln = 0; G.ilAfter = null; G.ilKills = 0;
+  G.rocks = []; G.invuln = 0; G.ilAfter = null; G.ilKills = 0; G.ilHits = 0;
   G.running = true; G.paused = false;
   G.tierCfg = TIERS[pref.tier] || TIERS.pilot;
   show('game');
@@ -2370,7 +2515,7 @@ $('btnClearBoard').addEventListener('click', () => {
 function drawHud(){
   const pips = $('hudPips');
   pips.innerHTML = '';
-  for(let i=0;i<3;i++){
+  for(let i=0;i<MAX_LIVES;i++){
     const p = document.createElement('span');
     p.className = 'pip' + (i < G.lives ? '' : ' off');
     pips.appendChild(p);
