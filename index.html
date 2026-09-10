@@ -106,6 +106,25 @@
   .btn.danger:hover{border-color:var(--ember); color:#FFD9CF}
   :focus-visible{outline:2px solid var(--verd); outline-offset:2px}
 
+
+  /* ---------- landing page ---------- */
+  .home{
+    width:100%; max-width:640px; margin:0 auto;
+    display:flex; flex-direction:column; gap:18px;
+  }
+  .home-hero{text-align:center; padding-top:clamp(8px, 5vh, 54px)}
+  .home-hero .lede{margin:12px auto 0; max-width:44ch}
+  .home-panel{gap:16px}
+  .big-actions{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  @media (max-width:460px){ .big-actions{grid-template-columns:1fr} }
+  .btn-huge{
+    padding:19px 20px; font-size:.94rem; letter-spacing:.15em;
+  }
+  .mini-actions{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+  .home .stat-line{text-align:center; line-height:1.9}
+  .rules{margin:0; padding-left:18px; color:var(--muted); font-size:.86rem; line-height:1.75}
+  .rules li + li{margin-top:6px}
+
   /* ---------- start screen ---------- */
   .start-grid{
     display:grid;
@@ -285,6 +304,61 @@
   .pip.off{background:#22343A; box-shadow:none}
   .pip.cannon{width:14px; background:var(--brass); box-shadow:0 0 10px rgba(227,180,94,.5)}
   .pip.cannon.off{background:#22343A; box-shadow:none}
+
+  /* ---------- hangar ---------- */
+  .credits-bar{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    border:1px solid var(--line); border-left:2px solid var(--brass);
+    border-radius:var(--r); background:rgba(227,180,94,.06);
+    padding:14px 18px;
+  }
+  .credits-bar .amt{
+    font-family:var(--hud); font-weight:700; font-size:1.7rem; color:var(--brass);
+    font-variant-numeric:tabular-nums; line-height:1;
+  }
+  .credits-bar .lbl{
+    font-family:var(--hud); font-size:.64rem; letter-spacing:.19em;
+    text-transform:uppercase; color:var(--dim);
+  }
+  .credits-bar .note{flex:1; min-width:220px; font-size:.82rem; color:var(--muted); line-height:1.5}
+
+  .bay{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px}
+  .bay-card{
+    display:flex; flex-direction:column; gap:10px;
+    border:1px solid var(--line); border-radius:var(--r);
+    background:linear-gradient(180deg, rgba(19,33,40,.75), rgba(11,20,24,.75));
+    padding:16px;
+  }
+  .bay-card.owned{border-color:var(--line-hi)}
+  .bay-card.active{border-color:var(--verd); background:linear-gradient(180deg, rgba(31,90,78,.4), rgba(11,20,24,.8))}
+  .bay-card.locked{opacity:.72}
+  .bay-card canvas{display:block; width:100%; height:78px}
+  .bay-name{
+    font-family:var(--hud); font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+    font-size:.92rem; display:flex; align-items:baseline; gap:9px;
+  }
+  .bay-blurb{font-size:.82rem; color:var(--muted); line-height:1.5; flex:1}
+  .bay-stats{display:flex; flex-wrap:wrap; gap:5px}
+  .stat-chip{
+    font-family:var(--hud); font-size:.6rem; letter-spacing:.12em; text-transform:uppercase;
+    border:1px solid var(--line); border-radius:2px; padding:3px 7px; color:var(--muted);
+  }
+  .stat-chip.up{color:var(--verd); border-color:rgba(63,217,174,.4)}
+  .stat-chip.down{color:#C79184; border-color:rgba(255,106,69,.35)}
+  .price{
+    font-family:var(--hud); font-weight:600; font-size:.8rem; color:var(--brass);
+    font-variant-numeric:tabular-nums;
+  }
+  .price.cant{color:var(--dim)}
+  .owned-tag{
+    font-family:var(--hud); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--verd);
+  }
+  .slot-note{
+    font-family:var(--hud); font-size:.66rem; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--dim);
+  }
+  .slot-note b{color:var(--verd)}
 
   /* ---------- roll of honour ---------- */
   .board{display:flex; flex-direction:column; gap:5px}
@@ -645,13 +719,57 @@
 
   <!-- ============ START ============ -->
   <section class="screen on" id="scStart">
-    <header>
-      <div class="eyebrow">华文理解 <span class="sep">/</span> sentence comprehension drill</div>
-      <h1>Hanzi <span class="glow">Interceptor</span></h1>
-      <p class="lede">A sentence comes up on the display and its possible meanings drift down the screen. <b>Shoot the one that matches</b> before the right answer slips past you — hit a wrong one and it costs a shield. Every hit can drop an upgrade pod worth flying for.</p>
-    </header>
+    <div class="home">
+      <header class="home-hero">
+        <div class="eyebrow">华文历史 <span class="sep">/</span> SJKC Year 4 History</div>
+        <h1>Hanzi <span class="glow">Interceptor</span></h1>
+        <p class="lede">Read the sentence. Shoot the meaning that matches.</p>
+      </header>
 
-    <div class="start-grid">
+      <div class="console home-panel">
+        <div>
+          <span class="field-label">Section</span>
+          <select id="chapterSel"><option value="*">All sections</option></select>
+        </div>
+
+        <div class="big-actions">
+          <button class="btn primary btn-huge" id="btnLaunch">Launch</button>
+          <button class="btn btn-huge" id="btnStudy">Study first</button>
+        </div>
+
+        <div class="mini-actions">
+          <button class="btn tiny ghost" id="btnHangar">Hangar</button>
+          <button class="btn tiny ghost" id="btnHelp">How to play</button>
+          <button class="btn tiny ghost" id="btnSettings">Settings</button>
+          <button class="btn tiny ghost" id="btnLibrary">Sentence library</button>
+        </div>
+
+        <div class="stat-line" id="startStats">—</div>
+      </div>
+
+      <div class="console" id="boardPanel">
+        <div class="board-head">
+          <span class="eyebrow">Roll of honour</span>
+          <span class="sp"></span>
+          <button class="btn tiny ghost danger" id="btnClearBoard">Clear</button>
+        </div>
+        <div class="board" id="startBoard"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SETTINGS ============ -->
+  <section class="screen" id="scSettings">
+    <div class="home">
+      <div class="lib-head">
+        <div>
+          <div class="eyebrow">Settings</div>
+          <h1 style="font-size:clamp(1.6rem,4vw,2.2rem)">How it plays</h1>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn ghost" id="btnSettingsBack">Back</button>
+      </div>
+
       <div class="console">
         <div>
           <span class="field-label">Flight level</span>
@@ -663,12 +781,7 @@
         </div>
 
         <div>
-          <span class="field-label">Sentence set</span>
-          <select id="chapterSel"><option value="*">All sentences</option></select>
-        </div>
-
-        <div>
-          <span class="field-label">Display</span>
+          <span class="field-label">Display and sound</span>
           <div class="toggles">
             <button class="toggle" id="tglPinyin" aria-pressed="true"><span class="dot"></span>Pinyin</button>
             <button class="toggle" id="tglSound" aria-pressed="true"><span class="dot"></span>Sound</button>
@@ -692,72 +805,73 @@
             <button data-rate="0.9" aria-pressed="true">Normal</button>
           </div>
         </div>
-
-        <div class="launch-row">
-          <button class="btn primary" id="btnLaunch">Launch</button>
-          <button class="btn" id="btnStudy">Study first</button>
-          <button class="btn ghost" id="btnLibrary">Sentence library</button>
-        </div>
-
-        <div class="stat-line" id="startStats">—</div>
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:14px">
-        <div class="specimen">
-          <div class="cap">Sample target</div>
-          <div class="pinyin" id="specPy">shí jiān guò de zhēn kuài</div>
-          <div class="hanzi" id="specZh" style="font-size:1.5rem; text-align:left">时间过得真快</div>
-        </div>
-        <div class="specimen" style="border-left-color:var(--line)">
-          <div class="cap">Controls</div>
-          <div class="keys">
-            <span class="key"><b>←</b> <b>→</b> move</span>
-            <span class="key"><b>A</b> <b>D</b> move</span>
-            <span class="key"><b>SPACE</b> fire</span>
-            <span class="key"><b>L</b> hear the sentence</span>
-            <span class="key"><b>P</b> pause</span>
-            <span class="key">drag &amp; tap on touch</span>
-          </div>
-        </div>
-        <div class="specimen" style="border-left-color:var(--verd)">
-          <div class="cap">Upgrade pods — fly into them to collect</div>
-          <div class="pods-legend">
-            <div class="pod-row"><span class="pod-chip" style="color:#3FD9AE">C</span><span><b>Cannon</b> — up to three levels. Faster, wider fire. A wrong shot knocks it back one level.</span></div>
-            <div class="pod-row"><span class="pod-chip" style="color:#E3B45E">+</span><span><b>Shield</b> — repairs one shield.</span></div>
-            <div class="pod-row"><span class="pod-chip" style="color:#6FB3E0">T</span><span><b>Slow-mo</b> — the answers drift at half speed for eight seconds.</span></div>
-            <div class="pod-row"><span class="pod-chip" style="color:#B98CE0">X</span><span><b>Scan</b> — burns away one wrong answer. The 50/50 lifeline.</span></div>
-            <div class="pod-row"><span class="pod-chip" style="color:#FF9F4A">★</span><span><b>Bonus</b> — 300 points.</span></div>
-          </div>
-        </div>
-        <div class="specimen" style="border-left-color:var(--brass)">
-          <div class="cap">Rules of engagement</div>
-          <ul style="margin:0; padding-left:18px; color:var(--muted); font-size:.86rem; line-height:1.75">
-            <li><b>Identify ten to clear a level.</b> There is no end — the levels keep coming until your shields run out.</li>
-            <li>Only a <em>clean</em> hit counts toward the ten. Shoot a wrong meaning first and you can still take the right one for points, but that item drops back into the deck and returns a few turns later.</li>
-            <li>Four shields. Two things cost one: shooting a wrong meaning, or letting the correct meaning fall past you.</li>
-            <li>Clearing a level repairs a shield and pays a bonus that grows with the level.</li>
-            <li>Every meaning falls in its own lane, so the right one is never hidden behind a wrong one — line up under it and fire.</li>
-            <li>Wrong meanings can be ignored entirely; let them drift off the bottom. There is no penalty for waiting.</li>
-            <li>Answer quickly for a speed bonus; three in a row starts a multiplier, up to ×5.</li>
-            <li>Every correct answer can drop an upgrade pod. Fly into it before it falls away.</li>
-            <li>An asteroid field drifts through between levels. Big rocks break into smaller ones, and smaller ones are worth more. Hitting a rock <em>never</em> costs a shield — it knocks your cannon down a level and eats into the clear bonus.</li>
-            <li>Each level falls faster than the last, from about 15 seconds an item down to about 6.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="console" id="boardPanel">
-        <div class="board-head">
-          <span class="eyebrow">Roll of honour</span>
-          <span class="sp"></span>
-          <button class="btn tiny ghost danger" id="btnClearBoard">Clear</button>
-        </div>
-        <div class="board" id="startBoard"></div>
       </div>
     </div>
+  </section>
 
-    <div class="foot">
-      Built for revision, not for grinding — a run is one pass through the set, and every sentence you miss is listed afterwards with its correct meaning so it can be read properly.
+  <!-- ============ HOW TO PLAY ============ -->
+  <section class="screen" id="scHelp">
+    <div class="home">
+      <div class="lib-head">
+        <div>
+          <div class="eyebrow">How to play</div>
+          <h1 style="font-size:clamp(1.6rem,4vw,2.2rem)">Rules of engagement</h1>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn ghost" id="btnHelpBack">Back</button>
+      </div>
+
+      <div class="specimen">
+        <div class="cap">A target looks like this</div>
+        <div class="pinyin" id="specPy">shí jiān guò de zhēn kuài</div>
+        <div class="hanzi" id="specZh" style="font-size:1.5rem; text-align:left">时间过得真快</div>
+      </div>
+
+      <div class="specimen" style="border-left-color:var(--line)">
+        <div class="cap">Controls</div>
+        <div class="keys">
+          <span class="key"><b>←</b> <b>→</b> move</span>
+          <span class="key"><b>A</b> <b>D</b> move</span>
+          <span class="key"><b>SPACE</b> fire</span>
+          <span class="key"><b>L</b> hear the sentence</span>
+          <span class="key"><b>P</b> pause</span>
+          <span class="key">drag &amp; tap on touch</span>
+        </div>
+      </div>
+
+      <div class="specimen" style="border-left-color:var(--brass)">
+        <div class="cap">The run</div>
+        <ul class="rules">
+          <li><b>Identify ten to clear a level.</b> There is no end — the levels keep coming until your shields run out.</li>
+          <li>Only a <em>clean</em> hit counts toward the ten. Shoot a wrong meaning first and you can still take the right one for points, but that item drops back into the deck and returns a few turns later.</li>
+          <li>Four shields. Two things cost one: shooting a wrong meaning, or letting the correct meaning fall past you.</li>
+          <li>Clearing a level repairs a shield and pays a bonus that grows with the level.</li>
+          <li>Every meaning falls in its own lane, so the right one is never hidden behind a wrong one — line up under it and fire.</li>
+          <li>Wrong meanings can be ignored entirely; let them drift off the bottom. There is no penalty for waiting.</li>
+          <li>Answer quickly for a speed bonus; three in a row starts a multiplier, up to ×5.</li>
+          <li>Each level falls faster than the last, from about 15 seconds an item down to about 6.</li>
+        </ul>
+      </div>
+
+      <div class="specimen" style="border-left-color:var(--verd)">
+        <div class="cap">Upgrade pods — fly into them to collect</div>
+        <div class="pods-legend">
+          <div class="pod-row"><span class="pod-chip" style="color:#3FD9AE">C</span><span><b>Cannon</b> — up to three levels. Faster, wider fire. A wrong shot knocks it back one level.</span></div>
+          <div class="pod-row"><span class="pod-chip" style="color:#E3B45E">+</span><span><b>Shield</b> — repairs one shield.</span></div>
+          <div class="pod-row"><span class="pod-chip" style="color:#6FB3E0">T</span><span><b>Slow-mo</b> — the answers drift at half speed for eight seconds.</span></div>
+          <div class="pod-row"><span class="pod-chip" style="color:#B98CE0">X</span><span><b>Scan</b> — burns away one wrong answer. The 50/50 lifeline.</span></div>
+          <div class="pod-row"><span class="pod-chip" style="color:#FF9F4A">★</span><span><b>Bonus</b> — 300 points.</span></div>
+        </div>
+      </div>
+
+      <div class="specimen" style="border-left-color:#9C8F79">
+        <div class="cap">Asteroid fields and credits</div>
+        <ul class="rules">
+          <li>An asteroid field drifts through between levels. Big rocks break into smaller ones, and smaller ones are worth more. Hitting a rock <em>never</em> costs a shield — it knocks your cannon down a level and eats into the clear bonus.</li>
+          <li>Every run banks credits — one for every 20 points. Spend them in the <b>Hangar</b> on new ships and accessories. Credits are a separate purse, so buying things never lowers your score.</li>
+          <li>Everything missed is listed on the debrief with its correct meaning, and can be replayed or read as study cards.</li>
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -807,6 +921,7 @@
       </div>
       <div class="metrics" style="padding-bottom:6px">
         <div class="metric"><div class="k">Level reached</div><div class="v" id="dbLevel">1</div></div>
+        <div class="metric"><div class="k">Credits earned</div><div class="v" id="dbCredits" style="color:var(--brass)">+0</div></div>
         <div class="metric"><div class="k">Correct</div><div class="v" id="dbCorrect">0/0</div></div>
         <div class="metric"><div class="k">Accuracy</div><div class="v" id="dbAcc">0%</div></div>
         <div class="metric"><div class="k">Best streak</div><div class="v" id="dbStreak">0</div></div>
@@ -835,6 +950,38 @@
     <div id="dbLogWrap">
       <div class="eyebrow" style="margin-bottom:12px">Review log</div>
       <div class="log" id="dbLog"></div>
+    </div>
+  </section>
+
+  <!-- ============ HANGAR ============ -->
+  <section class="screen" id="scHangar">
+    <div class="lib-head">
+      <div>
+        <div class="eyebrow">Hangar</div>
+        <h1 style="font-size:clamp(1.6rem,4vw,2.2rem)">Pick your ship</h1>
+      </div>
+      <div style="flex:1"></div>
+      <button class="btn ghost" id="btnHangarBack">Back to base</button>
+    </div>
+
+    <div class="credits-bar">
+      <div>
+        <div class="lbl">Credits</div>
+        <div class="amt" id="hgCredits">0</div>
+      </div>
+      <p class="note">Credits are banked at the end of every run — one for every 20 points — and they are separate from your score, so buying things never touches the roll of honour.</p>
+    </div>
+
+    <div>
+      <div class="eyebrow" style="margin:6px 0 12px">Ships</div>
+      <div class="bay" id="shipBay"></div>
+    </div>
+
+    <div>
+      <div class="eyebrow" style="margin:20px 0 12px">
+        Accessories <span class="sep">/</span> <span class="slot-note" id="slotNote"></span>
+      </div>
+      <div class="bay" id="accBay"></div>
     </div>
   </section>
 
@@ -2127,7 +2274,7 @@ function refreshVoiceUI(){
 
 /* ---------- dom ---------- */
 const $ = id => document.getElementById(id);
-const screens = {start:$('scStart'), game:$('scGame'), debrief:$('scDebrief'), library:$('scLibrary'), study:$('scStudy')};
+const screens = {start:$('scStart'), game:$('scGame'), debrief:$('scDebrief'), library:$('scLibrary'), study:$('scStudy'), hangar:$('scHangar'), settings:$('scSettings'), help:$('scHelp')};
 function show(name){
   Object.values(screens).forEach(s => s.classList.remove('on'));
   screens[name].classList.add('on');
@@ -2137,6 +2284,88 @@ function show(name){
 const field = $('field'), fx = $('fx'), ctx = fx.getContext('2d');
 const overlay = $('overlay'), ovBig = $('ovBig'), ovSub = $('ovSub'), ovReveal = $('ovReveal'), ovBtns = $('ovBtns');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+
+/* ============================================================
+   Hangar: ships, accessories and the credits that buy them
+   ------------------------------------------------------------
+   Credits are a separate wallet from score, so buying things
+   never eats into the number on the roll of honour.
+   ============================================================ */
+const LS_HANGAR = 'hanzi-interceptor.hangar.v1';
+
+const SHIPS = [
+  {id:'skiff', name:'Skiff', cost:0, shields:4, speed:1.0, cannon:1, drift:1.0, scoreMul:1.0,
+   hull:[[0,-20],[7,-2],[20,8],[9,6],[6,11],[-6,11],[-9,6],[-20,8],[-7,-2]],
+   line:'#3FD9AE',
+   blurb:'The trainer. Balanced, forgiving, nothing clever.'},
+  {id:'bastion', name:'Bastion', cost:450, shields:5, speed:0.82, cannon:1, drift:1.0, scoreMul:0.95,
+   hull:[[0,-17],[10,-6],[13,4],[22,10],[10,9],[7,13],[-7,13],[-10,9],[-22,10],[-13,4],[-10,-6]],
+   line:'#6FB3E0',
+   blurb:'Heavy hull, five shields. Slower to move, scores a shade less. Built for learning a new chapter.'},
+  {id:'lancer', name:'Lancer', cost:600, shields:3, speed:1.28, cannon:2, drift:1.0, scoreMul:1.15,
+   hull:[[0,-24],[4,-6],[16,10],[7,7],[4,12],[-4,12],[-7,7],[-16,10],[-4,-6]],
+   line:'#FF9F4A',
+   blurb:'Fast, and starts every run at cannon level 2 — but only three shields, and scores 15% more. For a chapter you already know.'},
+  {id:'phantom', name:'Phantom', cost:850, shields:4, speed:1.0, cannon:1, drift:0.85, scoreMul:0.9,
+   hull:[[0,-19],[6,-8],[10,2],[24,6],[12,8],[5,12],[-5,12],[-12,8],[-24,6],[-10,2],[-6,-8]],
+   line:'#B98CE0',
+   blurb:'Bends time: answers drift 15% slower, so there is room to read properly. Costs you 10% of the score.'}
+];
+
+const ACCESSORIES = [
+  {id:'plating', name:'Hull plating', cost:300, slot:true,
+   desc:'One extra shield on top of whatever the ship carries.'},
+  {id:'loader', name:'Auto-loader', cost:350, slot:true,
+   desc:'Every run starts at cannon level 2.'},
+  {id:'magnet', name:'Magnet coil', cost:400, slot:true,
+   desc:'Upgrade pods drift towards your ship instead of falling straight.'},
+  {id:'chrono', name:'Chrono core', cost:300, slot:true,
+   desc:'Slow-mo pods last 14 seconds instead of 8.'},
+  {id:'scanner', name:'Scanner array', cost:500, slot:true,
+   desc:'One wrong answer burns away on the first item of every level.'},
+  {id:'ember', name:'Ember livery', cost:150, slot:true, cosmetic:true,
+   desc:'Repaints the hull in ember orange. Does nothing at all, and looks good doing it.'}
+];
+
+const ACC_SLOTS = 2;
+
+const hangar = Object.assign(
+  {credits: 0, owned: {skiff: true}, ship: 'skiff', equipped: []},
+  lsGet(LS_HANGAR, {})
+);
+if(!hangar.owned) hangar.owned = {skiff: true};
+hangar.owned.skiff = true;
+if(!Array.isArray(hangar.equipped)) hangar.equipped = [];
+function saveHangar(){ lsSet(LS_HANGAR, hangar); }
+
+function shipById(id){ return SHIPS.find(x => x.id === id) || SHIPS[0]; }
+function currentShip(){ return shipById(hangar.ship); }
+function hasAcc(id){ return hangar.equipped.indexOf(id) >= 0; }
+
+/* effective stats for a run, ship plus whatever is bolted on */
+function loadout(){
+  const sh = currentShip();
+  return {
+    ship: sh,
+    shields: sh.shields + (hasAcc('plating') ? 1 : 0),
+    speed: sh.speed,
+    cannon: Math.max(sh.cannon, hasAcc('loader') ? 2 : 1),
+    drift: sh.drift,
+    scoreMul: sh.scoreMul,
+    magnet: hasAcc('magnet'),
+    slowMs: hasAcc('chrono') ? 14000 : 8000,
+    scanner: hasAcc('scanner'),
+    line: hasAcc('ember') ? '#FF7A45' : sh.line
+  };
+}
+
+function awardCredits(score){
+  const c = Math.floor(score / 20);
+  hangar.credits += c;
+  saveHangar();
+  return c;
+}
 
 /* ============================================================
    Game state
@@ -2148,11 +2377,11 @@ const G = {
   ship: {x: 0, w: 44, aimX: null, dir: 0},
   running: false, paused: false, phase: 'idle', lastFire: 0,
   W: 0, H: 0, dpr: 1, qStart: 0, tierCfg: TIERS.pilot,
-  cannon: 1, slowUntil: 0, podsTaken: 0, sinceLastPod: 0,
+  cannon: 1, maxLives: 4, kit: null, scanUsed: false,
+  slowUntil: 0, podsTaken: 0, sinceLastPod: 0,
   rocks: [], invuln: 0, ilUntil: 0, ilSpawn: 0, ilKills: 0, ilHits: 0, ilAfter: null
 };
 
-const MAX_LIVES = 4;
 const LEVEL_TARGET = 10;   // correct answers needed to clear a level
 
 /* ---------- asteroid interlude ---------- */
@@ -2302,7 +2531,7 @@ const CANNON = [
 function rollPod(){
   const opts = [];
   if(G.cannon < 3) opts.push('cannon','cannon');
-  if(G.lives < MAX_LIVES) opts.push('shield','shield');
+  if(G.lives < G.maxLives) opts.push('shield','shield');
   if(G.lives <= 1) opts.push('shield','shield','shield');   // a hand up when nearly out
   const liveWrong = G.targets.filter(t => !t.dead && !t.correct).length;
   if(liveWrong > 1) opts.push('scan');
@@ -2326,10 +2555,10 @@ function collectPod(p){
     if(G.cannon < 3){ G.cannon++; label = 'CANNON L' + G.cannon; }
     else { G.score += 300; label = '+300'; }
   }else if(p.type === 'shield'){
-    if(G.lives < MAX_LIVES){ G.lives++; }
+    if(G.lives < G.maxLives){ G.lives++; }
     else { G.score += 300; label = '+300'; }
   }else if(p.type === 'slow'){
-    G.slowUntil = performance.now() + 8000;
+    G.slowUntil = performance.now() + (G.kit ? G.kit.slowMs : 8000);
   }else if(p.type === 'scan'){
     const wrongs = G.targets.filter(t => !t.dead && !t.correct);
     if(wrongs.length){
@@ -2393,11 +2622,13 @@ function startRun(list){
   G.pool = pool.slice();
   G.deck = shuffle(G.pool);
   G.current = null;
-  G.lives = MAX_LIVES; G.score = 0; G.streak = 0; G.bestStreak = 0;
-  G.level = 1; G.levelHits = 0; G.flawed = false; G.correct = 0; G.answered = 0; G.misses = [];
+  G.kit = loadout();
+  G.maxLives = G.kit.shields;
+  G.lives = G.maxLives; G.score = 0; G.streak = 0; G.bestStreak = 0;
+  G.level = 1; G.levelHits = 0; G.flawed = false; G.scanUsed = false; G.correct = 0; G.answered = 0; G.misses = [];
   G.targets.forEach(t => t.el.remove()); G.targets = [];
   G.bullets = []; G.particles = []; G.pods = []; G.floaters = [];
-  G.cannon = 1; G.slowUntil = 0; G.podsTaken = 0; G.sinceLastPod = 0;
+  G.cannon = G.kit.cannon; G.slowUntil = 0; G.podsTaken = 0; G.sinceLastPod = 0;
   G.rocks = []; G.invuln = 0; G.ilAfter = null; G.ilKills = 0; G.ilHits = 0;
   G.running = true; G.paused = false;
   G.tierCfg = TIERS[pref.tier] || TIERS.pilot;
@@ -2435,14 +2666,15 @@ function levelComplete(){
   G.phase = 'between';
   const bonus = 300 * G.level;
   G.score += bonus;
-  if(G.lives < MAX_LIVES) G.lives++;                     // a shield back for clearing
+  if(G.lives < G.maxLives) G.lives++;                    // a shield back for clearing
   G.level++;
   G.levelHits = 0;
+  G.scanUsed = false;
   drawHud();
 
   ovBig.textContent = 'Level ' + G.level;
   ovSub.textContent = 'Ten identified. +' + bonus.toLocaleString() +
-    (G.lives < MAX_LIVES ? ' and a shield repaired.' : '. Shields full.') +
+    (G.lives < G.maxLives ? '. Shields full.' : ' and a shield repaired.') +
     ' They fall faster from here.';
   ovReveal.hidden = true;
   ovBtns.innerHTML = '';
@@ -2501,6 +2733,20 @@ function showQuestion(){
   spawnTargets(opts);
   G.phase = 'live';
   G.qStart = performance.now();
+
+  // scanner array clears one wrong answer at the top of each level
+  if(G.kit && G.kit.scanner && !G.scanUsed && G.levelHits === 0){
+    G.scanUsed = true;
+    setTimeout(() => {
+      if(G.phase !== 'live') return;
+      const wrongs = G.targets.filter(t => !t.dead && !t.correct);
+      if(wrongs.length < 2) return;
+      const v = wrongs[Math.floor(Math.random() * wrongs.length)];
+      v.dead = true; v.el.classList.add('fade');
+      burst(v.x + v.w/2, v.y + v.h/2, '#B98CE0', 16);
+      floater(v.x + v.w/2, v.y + v.h/2, 'SCANNED', '#B98CE0');
+    }, 900);
+  }
   if(pref.autoSpeak && TTS.ready) TTS.say(q.zh, $('btnSpeak'));
 }
 
@@ -2538,7 +2784,7 @@ function spawnTargets(opts){
     const t = {
       el: els[i], text: o.text, correct: o.correct,
       x, y, w: tw, h: heights[i],
-      vy: (G.H + tallest + 130) / dur,
+      vy: (G.H + tallest + 130) / dur * (G.kit ? G.kit.drift : 1),
       sway: reduceMotion ? 0 : 3,
       phase: Math.random()*Math.PI*2,
       x0: x, dead: false
@@ -2561,7 +2807,7 @@ function hitCorrect(t){
   G.streak++;
   G.bestStreak = Math.max(G.bestStreak, G.streak);
   const mult = Math.min(5, 1 + Math.floor(G.streak / 3));
-  G.score += (100 + speedBonus) * mult;
+  G.score += Math.round((100 + speedBonus) * mult * (G.kit ? G.kit.scoreMul : 1));
   G.correct++; G.answered++;
   if(G.flawed) requeue(G.current);   // fumbled first - it comes back around
   else G.levelHits++;                // a clean identification counts toward the level
@@ -2659,6 +2905,7 @@ function endRun(reason){
   sfx.over();
   const best = Math.max(lsGet(LS_BEST, 0), G.score);
   lsSet(LS_BEST, best);
+  const earned = awardCredits(G.score);
 
   $('dbTitle').textContent =
     reason === 'RETIRED' ? 'Debrief / retired at level ' + G.level :
@@ -2666,6 +2913,7 @@ function endRun(reason){
     'Debrief / shields down at level ' + G.level;
   $('dbScore').textContent = G.score.toLocaleString();
   $('dbLevel').textContent = G.level;
+  $('dbCredits').textContent = '+' + earned.toLocaleString();
   $('dbCorrect').textContent = G.correct + '/' + Math.max(G.answered, G.correct);
   const acc = G.answered ? Math.round(G.correct / G.answered * 100) : 0;
   $('dbAcc').textContent = acc + '%';
@@ -2768,7 +3016,7 @@ $('btnClearBoard').addEventListener('click', () => {
 function drawHud(){
   const pips = $('hudPips');
   pips.innerHTML = '';
-  for(let i=0;i<MAX_LIVES;i++){
+  for(let i=0;i<G.maxLives;i++){
     const p = document.createElement('span');
     p.className = 'pip' + (i < G.lives ? '' : ' off');
     pips.appendChild(p);
@@ -2805,7 +3053,7 @@ function update(dt){
   // ship
   const s = G.ship;
   if(s.dir !== 0){
-    s.x += s.dir * 640 * dt;
+    s.x += s.dir * 640 * (G.kit ? G.kit.speed : 1) * dt;
     s.aimX = null;
   }else if(s.aimX !== null){
     const k = 1 - Math.pow(0.0009, dt);
@@ -2841,6 +3089,10 @@ function update(dt){
   for(const p of G.pods){
     p.y += p.vy * dt;
     p.spin += dt * 2.2;
+    if(G.kit && G.kit.magnet){
+      // steer toward the ship for the whole fall, capped so it still feels like flying
+      p.x += Math.max(-175, Math.min(175, (sx - p.x) * 2.2)) * dt;
+    }
     if(!p.taken && Math.abs(p.x - sx) < p.r + 20 && Math.abs(p.y - sy) < p.r + 18){
       p.taken = true;
       collectPod(p);
@@ -2925,6 +3177,58 @@ function fire(){
   sfx.shoot();
 }
 
+
+/* Draws a ship at the current canvas origin. Shared by the game and the
+   hangar preview so what you buy is what you fly. */
+function drawShip(c, sh, line, cannon, now, scale){
+  c.save();
+  if(scale && scale !== 1) c.scale(scale, scale);
+
+  const flick = 0.6 + Math.sin(now/45)*0.25;
+  const rgb = hexRgb(line);
+  const grd = c.createLinearGradient(0, 6, 0, 30);
+  grd.addColorStop(0, 'rgba(' + rgb + ',' + (0.65*flick).toFixed(2) + ')');
+  grd.addColorStop(1, 'rgba(' + rgb + ',0)');
+  c.fillStyle = grd;
+  c.beginPath();
+  c.moveTo(-5, 6); c.lineTo(5, 6); c.lineTo(0, 6 + 22*flick); c.closePath();
+  c.fill();
+
+  if(cannon >= 2){
+    c.fillStyle = '#12252C';
+    c.strokeStyle = line;
+    c.lineWidth = 1.2;
+    [-15, 15].forEach(dx => { c.beginPath(); c.rect(dx - 3, -8, 6, 13); c.fill(); c.stroke(); });
+  }
+  if(cannon >= 3){
+    c.fillStyle = '#E3B45E';
+    c.beginPath(); c.rect(-1.6, -27, 3.2, 8); c.fill();
+  }
+
+  c.beginPath();
+  sh.hull.forEach((pt, i) => { i ? c.lineTo(pt[0], pt[1]) : c.moveTo(pt[0], pt[1]); });
+  c.closePath();
+  c.fillStyle = '#12252C';
+  c.fill();
+  c.lineWidth = 1.4;
+  c.strokeStyle = line;
+  c.shadowColor = 'rgba(' + rgb + ',.7)';
+  c.shadowBlur = 10;
+  c.stroke();
+  c.shadowBlur = 0;
+
+  c.beginPath();
+  c.moveTo(0,-12); c.lineTo(3,-3); c.lineTo(-3,-3); c.closePath();
+  c.fillStyle = '#E3B45E';
+  c.fill();
+  c.restore();
+}
+
+function hexRgb(hex){
+  const h = hex.replace('#','');
+  return [0,2,4].map(i => parseInt(h.substr(i,2),16)).join(',');
+}
+
 /* ---------- render ---------- */
 function render(now){
   if(!G.W) return;
@@ -2970,56 +3274,7 @@ function render(now){
     ctx.save();
     ctx.translate(x, y);
 
-    // engine plume
-    const flick = 0.6 + Math.sin(now/45)*0.25;
-    const grd = ctx.createLinearGradient(0, 6, 0, 30);
-    grd.addColorStop(0, 'rgba(63,217,174,' + (0.65*flick).toFixed(2) + ')');
-    grd.addColorStop(1, 'rgba(63,217,174,0)');
-    ctx.fillStyle = grd;
-    ctx.beginPath();
-    ctx.moveTo(-5, 6); ctx.lineTo(5, 6); ctx.lineTo(0, 6 + 22*flick); ctx.closePath();
-    ctx.fill();
-
-    // side cannon pods earned from upgrades
-    if(G.cannon >= 2){
-      ctx.fillStyle = '#12252C';
-      ctx.strokeStyle = '#3FD9AE';
-      ctx.lineWidth = 1.2;
-      [-15, 15].forEach(dx => {
-        ctx.beginPath(); ctx.rect(dx - 3, -8, 6, 13); ctx.fill(); ctx.stroke();
-      });
-    }
-    if(G.cannon >= 3){
-      ctx.fillStyle = '#E3B45E';
-      ctx.beginPath(); ctx.rect(-1.6, -27, 3.2, 8); ctx.fill();
-    }
-
-    // hull
-    ctx.beginPath();
-    ctx.moveTo(0, -20);
-    ctx.lineTo(7, -2);
-    ctx.lineTo(20, 8);
-    ctx.lineTo(9, 6);
-    ctx.lineTo(6, 11);
-    ctx.lineTo(-6, 11);
-    ctx.lineTo(-9, 6);
-    ctx.lineTo(-20, 8);
-    ctx.lineTo(-7, -2);
-    ctx.closePath();
-    ctx.fillStyle = '#12252C';
-    ctx.fill();
-    ctx.lineWidth = 1.4;
-    ctx.strokeStyle = '#3FD9AE';
-    ctx.shadowColor = 'rgba(63,217,174,.7)';
-    ctx.shadowBlur = 10;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-
-    // cockpit
-    ctx.beginPath();
-    ctx.moveTo(0,-12); ctx.lineTo(3,-3); ctx.lineTo(-3,-3); ctx.closePath();
-    ctx.fillStyle = '#E3B45E';
-    ctx.fill();
+    drawShip(ctx, (G.kit ? G.kit.ship : currentShip()), (G.kit ? G.kit.line : currentShip().line), G.cannon, now, 1);
     ctx.restore();
   }
 
@@ -3176,7 +3431,7 @@ function refreshStart(){
   const sel = $('chapterSel');
   sel.innerHTML = '';
   const all = document.createElement('option'); all.value = '*';
-  all.textContent = 'All sentences (' + bank.length + ')';
+  all.textContent = 'All sections (' + bank.length + ' items)';
   sel.appendChild(all);
   tags.forEach(t => {
     const o = document.createElement('option');
@@ -3190,8 +3445,17 @@ function refreshStart(){
   renderBoard($('startBoard'), 5, null);
 
   const best = lsGet(LS_BEST, 0);
-  $('startStats').innerHTML = (usingCustom ? 'Your bank' : 'History Ch 5–6') +
-    ' <b>' + bank.length + '</b> sentences <span class="sep">·</span> personal best <b>' + best.toLocaleString() + '</b>';
+  const sh = currentShip();
+  const fitted = hangar.equipped
+    .map(id => (ACCESSORIES.find(a => a.id === id) || {}).name)
+    .filter(Boolean);
+  const tier = (TIERS[pref.tier] || {}).label || 'Pilot';
+  $('startStats').innerHTML =
+    '<b>' + bank.length + '</b> items <span class="sep">·</span> ' + tier +
+    ' <span class="sep">·</span> best <b>' + best.toLocaleString() + '</b>' +
+    ' <span class="sep">·</span> <b>' + hangar.credits.toLocaleString() + '</b> credits' +
+    '<br>flying the <b>' + sh.name + '</b>' +
+    (fitted.length ? ' with ' + fitted.join(' and ') : '');
 
   const spec = bank[Math.floor(Math.random()*bank.length)];
   if(spec){ $('specPy').textContent = spec.py || ''; $('specZh').textContent = spec.zh; }
@@ -3265,6 +3529,172 @@ $('btnStudyMisses').addEventListener('click', () => {
   show('study');
 });
 
+
+/* ============================================================
+   Hangar screen
+   ============================================================ */
+function shipStats(sh){
+  const out = [];
+  out.push({t: sh.shields + ' shields', k: sh.shields > 4 ? 'up' : sh.shields < 4 ? 'down' : ''});
+  if(sh.speed !== 1) out.push({t: (sh.speed > 1 ? 'fast' : 'slow') + ' handling', k: sh.speed > 1 ? 'up' : 'down'});
+  if(sh.cannon > 1) out.push({t: 'starts at cannon L' + sh.cannon, k: 'up'});
+  if(sh.drift !== 1) out.push({t: Math.round((1 - sh.drift) * 100) + '% slower drift', k: 'up'});
+  if(sh.scoreMul !== 1){
+    const pct = Math.round(Math.abs(sh.scoreMul - 1) * 100);
+    out.push({t: (sh.scoreMul > 1 ? '+' : '−') + pct + '% score', k: sh.scoreMul > 1 ? 'up' : 'down'});
+  }
+  return out;
+}
+
+function shipPreview(canvas, sh, line){
+  const c = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = canvas.clientWidth || 220, h = 78;
+  canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  c.clearRect(0, 0, w, h);
+  c.save();
+  c.translate(w / 2, h / 2 + 6);
+  drawShip(c, sh, line, 1, performance.now(), 1.35);
+  c.restore();
+}
+
+function renderHangar(){
+  $('hgCredits').textContent = hangar.credits.toLocaleString();
+  $('slotNote').innerHTML = 'fit up to <b>' + ACC_SLOTS + '</b> at a time · <b>' +
+    hangar.equipped.length + '</b> fitted';
+
+  const bay = $('shipBay');
+  bay.innerHTML = '';
+  SHIPS.forEach(sh => {
+    const owned = !!hangar.owned[sh.id];
+    const active = hangar.ship === sh.id;
+    const afford = hangar.credits >= sh.cost;
+
+    const card = document.createElement('div');
+    card.className = 'bay-card' + (active ? ' active' : owned ? ' owned' : ' locked');
+
+    const cv = document.createElement('canvas');
+    card.appendChild(cv);
+
+    const nm = document.createElement('div');
+    nm.className = 'bay-name';
+    nm.textContent = sh.name;
+    if(active){ const t = document.createElement('span'); t.className = 'owned-tag'; t.textContent = 'flying'; nm.appendChild(t); }
+    else if(owned){ const t = document.createElement('span'); t.className = 'owned-tag'; t.textContent = 'owned'; nm.appendChild(t); }
+    card.appendChild(nm);
+
+    const chips = document.createElement('div');
+    chips.className = 'bay-stats';
+    shipStats(sh).forEach(st => {
+      const c2 = document.createElement('span');
+      c2.className = 'stat-chip' + (st.k ? ' ' + st.k : '');
+      c2.textContent = st.t;
+      chips.appendChild(c2);
+    });
+    card.appendChild(chips);
+
+    const bl = document.createElement('div');
+    bl.className = 'bay-blurb'; bl.textContent = sh.blurb;
+    card.appendChild(bl);
+
+    const row = document.createElement('div');
+    row.className = 'launch-row';
+    if(!owned){
+      const price = document.createElement('span');
+      price.className = 'price' + (afford ? '' : ' cant');
+      price.textContent = sh.cost.toLocaleString() + ' cr';
+      const buy = document.createElement('button');
+      buy.className = 'btn tiny' + (afford ? ' primary' : ' ghost');
+      buy.textContent = afford ? 'Buy' : 'Not enough';
+      buy.disabled = !afford;
+      buy.onclick = () => {
+        if(hangar.credits < sh.cost) return;
+        hangar.credits -= sh.cost;
+        hangar.owned[sh.id] = true;
+        hangar.ship = sh.id;
+        saveHangar(); sfx.pickup(); renderHangar(); refreshStart();
+      };
+      row.appendChild(buy); row.appendChild(price);
+    }else if(!active){
+      const use = document.createElement('button');
+      use.className = 'btn tiny'; use.textContent = 'Fly this';
+      use.onclick = () => { hangar.ship = sh.id; saveHangar(); renderHangar(); refreshStart(); };
+      row.appendChild(use);
+    }else{
+      const t = document.createElement('span');
+      t.className = 'slot-note'; t.textContent = 'in the launch bay';
+      row.appendChild(t);
+    }
+    card.appendChild(row);
+    bay.appendChild(card);
+    shipPreview(cv, sh, hasAcc('ember') && owned ? '#FF7A45' : sh.line);
+  });
+
+  const ab = $('accBay');
+  ab.innerHTML = '';
+  ACCESSORIES.forEach(a => {
+    const owned = !!hangar.owned[a.id];
+    const on = hasAcc(a.id);
+    const afford = hangar.credits >= a.cost;
+    const full = hangar.equipped.length >= ACC_SLOTS;
+
+    const card = document.createElement('div');
+    card.className = 'bay-card' + (on ? ' active' : owned ? ' owned' : ' locked');
+
+    const nm = document.createElement('div');
+    nm.className = 'bay-name';
+    nm.textContent = a.name;
+    if(on){ const t = document.createElement('span'); t.className = 'owned-tag'; t.textContent = 'fitted'; nm.appendChild(t); }
+    else if(owned){ const t = document.createElement('span'); t.className = 'owned-tag'; t.textContent = 'owned'; nm.appendChild(t); }
+    card.appendChild(nm);
+
+    const bl = document.createElement('div');
+    bl.className = 'bay-blurb'; bl.textContent = a.desc;
+    card.appendChild(bl);
+
+    const row = document.createElement('div');
+    row.className = 'launch-row';
+    if(!owned){
+      const price = document.createElement('span');
+      price.className = 'price' + (afford ? '' : ' cant');
+      price.textContent = a.cost.toLocaleString() + ' cr';
+      const buy = document.createElement('button');
+      buy.className = 'btn tiny' + (afford ? ' primary' : ' ghost');
+      buy.textContent = afford ? 'Buy' : 'Not enough';
+      buy.disabled = !afford;
+      buy.onclick = () => {
+        if(hangar.credits < a.cost) return;
+        hangar.credits -= a.cost;
+        hangar.owned[a.id] = true;
+        if(hangar.equipped.length < ACC_SLOTS) hangar.equipped.push(a.id);
+        saveHangar(); sfx.pickup(); renderHangar(); refreshStart();
+      };
+      row.appendChild(buy); row.appendChild(price);
+    }else{
+      const tog = document.createElement('button');
+      tog.className = 'btn tiny' + (on ? ' ghost' : '');
+      tog.textContent = on ? 'Remove' : (full ? 'No slot free' : 'Fit');
+      tog.disabled = !on && full;
+      tog.onclick = () => {
+        if(on) hangar.equipped = hangar.equipped.filter(x => x !== a.id);
+        else if(hangar.equipped.length < ACC_SLOTS) hangar.equipped.push(a.id);
+        saveHangar(); renderHangar(); refreshStart();
+      };
+      row.appendChild(tog);
+    }
+    card.appendChild(row);
+    ab.appendChild(card);
+  });
+}
+
+$('btnHangar').addEventListener('click', () => { renderHangar(); show('hangar'); });
+$('btnHelp').addEventListener('click', () => show('help'));
+$('btnHelpBack').addEventListener('click', () => { refreshStart(); show('start'); });
+$('btnSettings').addEventListener('click', () => { refreshStart(); show('settings'); });
+$('btnSettingsBack').addEventListener('click', () => { refreshStart(); show('start'); });
+$('btnHangarBack').addEventListener('click', () => { refreshStart(); show('start'); });
+
 /* ============================================================
    Study mode
    ============================================================ */
@@ -3287,7 +3717,7 @@ function buildStudySelect(){
   const sel = $('studySel');
   sel.innerHTML = '';
   const all = document.createElement('option');
-  all.value = '*'; all.textContent = 'All sections (' + bank.length + ')';
+  all.value = '*'; all.textContent = 'All sections (' + bank.length + ' items)';
   sel.appendChild(all);
   tags.forEach(t => {
     const o = document.createElement('option');
